@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.0-preview.5 · 2026-11-02
+
+- Follow the host's own sidebar page layout, not only its colors: a 38px header with the save status and the full-column tool, aligned with the conversation header seam, as on the Workspace files tab.
+- Show an icon and the short name "稿纸" on the sidebar tab, so the active tab no longer fades out its title.
+- Use the settings-card material for the base and character cards (R20, hairline stroke, no shadow); elevation stays reserved for floating surfaces and the composer.
+- Replace the check button with the host Switch for enabling a character, use arrows for moving and chevrons for folding, and keep pressed tools neutral instead of accent-filled.
+- Show character names inline, grow prompt fields with their text instead of a resize grip, and mark the focused card with the accent stroke.
+- Use the dashed add row from the Models settings page, drop the footer note, and restyle undo, error and conflict notices with host state colors.
+- Preserve draft operations, API contracts, stored data and all vendored skills.
+
 ## 0.2.0-preview.4 · 2026-11-02
 
 - Correct the editor surface to use the host composer's input-major fill, l2 elevation stroke and soft shadow instead of an ordinary layer-1 card.

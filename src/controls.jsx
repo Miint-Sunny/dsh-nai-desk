@@ -1,4 +1,5 @@
-// Adapted from DeepSeek Harness dsh-v0.2.1-rc.5 ui-primitives.
+// Adapted from DeepSeek Harness dsh-v0.2.1-rc.5 ui-primitives (Button, Switch, SegmentedControl)
+// and the Workspace files panel header tools.
 // Source: https://github.com/deepseek-ai/deepseek-harness/tree/dsh-v0.2.1-rc.5/packages/client/ui-primitives/src
 // MIT, Copyright (c) 2026 DeepSeek. See NOTICE.
 // Third-party plugins own their controls; do not require internal Client modules.
@@ -7,6 +8,17 @@ import React, { forwardRef, useEffect, useRef } from 'react'
 export const Button = forwardRef(function Button({ variant = 'ghost', size = 'sm', className = '', children, ...props }, ref) {
   return <button ref={ref} type="button" className={`nd-button nd-button-${variant} nd-button-${size} ${className}`} {...props}>{children}</button>
 })
+
+/** 28px square icon action, matching the host panel header tools. */
+export function ToolButton({ label, title, children, className = '', ...props }) {
+  return <button type="button" className={`nd-tool ${className}`} aria-label={label} title={title ?? label} {...props}>{children}</button>
+}
+
+/** Two-state toggle, 36×20; the state lives in aria-checked only. */
+export function Switch({ checked, onChange, label, title, disabled = false }) {
+  return <button type="button" role="switch" className="nd-switch" aria-checked={checked} aria-label={label} title={title}
+    disabled={disabled} onClick={() => onChange(!checked)}><span className="nd-switch-thumb" /></button>
+}
 
 export function PromptTabs({ id, value, options, onChange, label }) {
   const list = useRef(null)

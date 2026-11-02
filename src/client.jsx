@@ -1,7 +1,7 @@
 import React from 'react'
 import { DeskClient } from './client-state.js'
 import { requestDraft } from './transport.js'
-import { Icon, Panel } from './panel.jsx'
+import { Icon, Panel, TabTitle } from './panel.jsx'
 import { PANEL_ID, PANEL_KIND, PRESET_ID } from './protocol.js'
 import css from './style.css'
 
@@ -42,7 +42,7 @@ export function apply(ctx) {
       const id = current.getSnapshot().key
       const eligible = list.getSnapshot().byId[id]?.projectionValues?.agentPreset === PRESET_ID
       if (eligible && !unregister) unregister = ctx.sidebarRightTabs.register({
-        id: PANEL_ID, kind: PANEL_KIND, keepMounted: true, priority: 'extension', title: () => '提示词稿纸',
+        id: PANEL_ID, kind: PANEL_KIND, keepMounted: true, priority: 'extension', title: () => '稿纸',
         guide: [{ id: 'open', order: 45, title: () => '提示词稿纸', description: () => '编辑当前会话的提示词草稿', icon: () => <Icon kind="notebook" /> }],
       })
       else if (!eligible && unregister) { unregister(); unregister = undefined }
@@ -56,6 +56,9 @@ export function apply(ctx) {
     name: 'sidebar.right.pane.tab', key: PANEL_ID,
     inject: sessionId => ({ sessionId, sessionList: ctx.sessions.list, getClient, acquireClient }),
   }, Panel))
+  ctx.slots.inject('sidebar.right.pane.tab.title', () => ctx.slots.register({
+    name: 'sidebar.right.pane.tab.title', key: PANEL_ID, inject: sessionId => ({ sessionId }),
+  }, TabTitle))
 
   ctx.effect(() => {
     const beforeUnload = event => {

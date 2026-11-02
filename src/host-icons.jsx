@@ -16,13 +16,6 @@ const IconChevronDownOutlineArtwork = ({ size = 14, className, strokeWidth }) =>
 )
 
 
-const IconCheckOutlineArtwork = ({ size = 16, className, strokeWidth }) => (
-  <svg width={size} height={size} className={className} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" strokeWidth={strokeWidth}>
-    <path d="M2.25 8.5L5.49732 11.7473C5.90519 12.1552 6.57263 12.1344 6.95426 11.7018L13.75 4" stroke="currentColor" />
-  </svg>
-)
-
-
 const IconTrashOutlineArtwork = ({ size = 16, className, strokeWidth }) => (
   <svg width={size} height={size} className={className} viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" strokeWidth={strokeWidth}>
     <path d="M1.28149 3.88831H14.7187" stroke="currentColor" />
@@ -51,6 +44,6 @@ const IconPlusOutlineArtwork = ({ size = 16, className, strokeWidth }) => (
 )
 
 
-const icons = { up: IconChevronUpOutlineArtwork, down: IconChevronDownOutlineArtwork, check: IconCheckOutlineArtwork, trash: IconTrashOutlineArtwork, expand: IconFullscreenOutlineArtwork, plus: IconPlusOutlineArtwork }
+const icons = { chevronUp: IconChevronUpOutlineArtwork, chevronDown: IconChevronDownOutlineArtwork, trash: IconTrashOutlineArtwork, expand: IconFullscreenOutlineArtwork, plus: IconPlusOutlineArtwork }
 export function HostIcon({ kind }) { const Component = icons[kind]; return Component ? <Component size={16} strokeWidth={1} /> : null }
 
