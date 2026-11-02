@@ -4,6 +4,10 @@
 # To change a value, copy this whole row into your profile's cordis.patch.yml:
 # a patch replaces the row's entire config, including the plugin list.
 - insert:
+    - id: nai-desk
+      name: dsh-nai5-prompting
+      config:
+        mode: desk
     - id: preset-nai5-prompting
       name: '@deepseek-ai/dsh-agent-preset'
       config:
@@ -33,7 +37,7 @@
                 - 拿不准的 tag、角色名或作品版本，有 web_search、web_fetch 工具时可以查证；没有这两个工具或查不到时，按技能对不确定词的处理方式交付。
 
                 ## 运行时 NOTE
-                - 只交文本。这里没有 NovelAI 生图、工作台填写或预设开关工具；用户要求生成或填写时，交可直接复制的内容，并说明没有实际生成或写入。
+                - 只交文本。这里可写入 dsh 内部稿纸，但没有 NovelAI 生图、官网填词或预设开关工具，不声称已生成图片或填入官网。
                 - NovelAI 界面的质量词与 UC 预设开关状态未知：未给开关状态时，按技能规则以预设关闭写足；用户说明实际开关后，按技能的去重规则处理。
                 - 默认按 V5 Full 写；用户指定 Curated 或其他模型时，按技能里的容量与能力说明调整。
                 - 交付格式按技能的字段约定：主串直接开写，角色栏用 `Character N:`，负面提示词用 `UC:`。代码块里只放能直接复制的最终内容，说明写在代码块外。
@@ -46,6 +50,12 @@
                 ## 范围
                 - 用用户的语言回复，默认中文。
                 - 这个模式没有终端、代码和系统操作工具；用户要做这类事时，建议换到其他模式。
+
+                ## 提示词稿纸（dsh-nai-desk）
+                - 本模式提供右侧可编辑稿纸。交付定稿时先用 desk_read 读取当前稿纸，再用 desk_set_main、desk_set_character 以及用户要求时的 desk_set_uc 写入对应字段。每次写入使用最新返回的 revision 作为 expected_revision；发生冲突先重读，不覆盖用户刚改的字。
+                - 保留用户没有要求修改的字段、角色及其 UC。角色编号从 1 开始，只能修改已有栏或在末尾新增；需要删除或排序时使用对应稿纸工具。
+                - 稿纸保存的是 dsh 内部文字，不是 NovelAI 官网状态。用户自行选字复制到官网。没有生图、官网填词、骰子、剪贴板或外部连接工具；不要声称已完成这些操作。
+                - 无需把同一整份定稿在聊天里重复一遍，简要说明已更新哪些栏即可；用户要求聊天内给词时照常给。
           # Hides global tools (MCP servers, host plugins, Desktop add-ons) and
           # global skills (for example Desktop's Office skills) in this preset.
           - id: isolation
@@ -102,3 +112,5 @@
                 name: '@deepseek-ai/dsh-compaction-basic'
               - id: command-compact
                 name: '@deepseek-ai/dsh-command-compact'
+          - id: nai-desk-tools
+            name: dsh-nai5-prompting/tools

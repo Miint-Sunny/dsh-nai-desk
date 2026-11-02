@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "NAI5 Prompting",
-    "description": "Adds the NAI5 prompting preset: the 11 nai5-prompting skills for planning and writing NovelAI V5 prompts. Text only; its tools and skills stay separate from other presets."
+    "title": "NAI Desk",
+    "description": "NAI5 prompting preset, 11 writing skills, and a per-session editable prompt sidebar, isolated from other modes."
   }
 }

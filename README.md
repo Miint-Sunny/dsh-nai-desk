@@ -1,16 +1,31 @@
-# dsh-nai5-prompting
+# NAI Desk
 
 中文 | [English](README.en.md)
 
 给 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（dsh）加一个「NAI5 提示词」预设：用 [nai5-prompting](https://github.com/Miint-Sunny/nai5-prompting) 的 11 个拆分技能构思、设计和写 NovelAI V5 提示词。这个预设只交文本，不调用生图接口；它和 dsh 的其他预设互不干涉。
 
+## 0.2.0 Preview：预设与稿纸合为一个插件
+
+当前版本 **0.2.0-preview.1**。仓库从 `dsh-nai5-prompting` 改名为 `dsh-nai-desk`，插件显示名为 **NAI Desk**。安装标识仍为 `dsh-nai5-prompting`，预设 ID 仍为 `nai5-prompting`，沿用旧安装、旧会话、原有历史和稳定标签。
+
+- 右侧稿纸支持 **Base Prompt / UC** 和全栏编辑。
+- 角色栏支持 **Prompt / UC**、名称、上下排序、启用/停用、删除撤销、收起/展开。
+- 每个会话独立保存；模型通过 `desk_*` 写入，手动编辑自动保存，模型再读取时能看到。冲突保留本地文字，不静默覆盖另一端的新修改。
+- 安装后在 NAI5 会话打开右栏，选择 **提示词稿纸**。你自行选字复制到官网。
+
+默认安装自动包含预设和稿纸，不需要另装第二个插件。若 profile 自定义覆盖了整个 `preset-nai5-prompting` 行，请对照 [cordis.patch.yml](cordis.patch.yml) 加入稿纸工具行和交付说明。第一版没有骰子、复制按钮、剪贴板脚本、官网填词、OC 查询、块库、MCP 或 W.O.F 连接。
+
+结构化接口见 [src/api.d.ts](src/api.d.ts)：`POST /api/nai-desk/v1` 支持 read/mutate/watch，使用宿主 Connection 鉴权，只接受 NAI5 会话。正文按会话存入 `nai_desk` 领域，不写自定义会话事件。每字段 32,768 字符、每稿 1 MiB、最多 22 个角色。会话分叉暂不复制原稿纸，强制关闭前请确认“已保存”。
+
+变更见 [CHANGELOG.md](CHANGELOG.md)，验收见 [验证记录](docs/verification-0.2.0-preview.1.md)。这是预发布版；稳定版 v0.1.6 与旧版本标签保留。
+
 ## 装上之后有什么
 
 新建会话时，在预设菜单（默认显示「Standard mode」的那个按钮）里选「NAI5 提示词」。这个预设里：
 
-- **系统提示词**整份换成写提示词的说明，写代码那套说明不会出现。说明里交代了这个环境的实际情况（只交文本、没有生图和工作台写入、预设开关按「关闭写足」），方法本身全部交给技能。
+- **系统提示词**整份换成写提示词的说明，写代码那套说明不会出现。说明里交代了这个环境的实际情况（写入 dsh 稿纸、没有生图和官网自动填词、预设开关按「关闭写足」），方法本身全部交给技能。
 - **技能**只有 nai5-prompting v1.2.8 的 11 个拆分技能，原样拷贝，没有改动（见 [VENDOR.md](VENDOR.md)）。
-- **工具**只有这些：载入技能、读写工作区文件、看图、向你提问、联网搜索和抓取网页（核对 tag 和角色名）。没有终端、子代理、计划模式、任务清单和 MCP。dsh 0.2.2 起，当前模型线路拿不到搜索服务的凭据时，那一步不提供联网搜索。
+- **工具**只有这些：载入技能、读写工作区文件、看图、向你提问、联网搜索和抓取网页（核对 tag 和角色名）、稿纸读写。没有终端、子代理、计划模式、任务清单和 MCP。dsh 0.2.2 起，当前模型线路拿不到搜索服务的凭据时，那一步不提供联网搜索。
 - **长对话**：上下文快满时自动压缩，也可以手动输入 `/compact`。
 
 ## 互不干涉
@@ -22,28 +37,28 @@
 | 工具 | 只有本预设挂载的工具；MCP、宿主插件和其他全局工具都隐藏 | 不变 |
 | 工作区说明文件 | 只读工作区里的 `NAI.md`，不读 `AGENTS.md`、`CLAUDE.md` | 不变，不读 `NAI.md` |
 
-隔离只作用在这个预设的会话里，包括先开空会话再切换到这个预设的情况。插件不注册 HTTP 路由，不写任何自定义会话事件，不改默认预设。
+隔离只作用在这个预设的会话里，包括先开空会话再切换到这个预设的情况。稿纸接口使用 dsh 已认证的 Connection，不另开裸端口，不写自定义会话事件，也不改默认预设。
 
 例外：`~/.dsh/AGENTS.md` 和 `~/.agents/AGENTS.md` 这两个全局说明文件由 dsh 固定读取，没法按预设关掉。写代码的规则不要放在这两个文件里，放进各个代码仓库自己的 `AGENTS.md`。
 
 ## 安装
 
-需要 dsh **0.2.1-rc.2 及以上、0.3.0 以下**（`package.json` 的 `engines.dsh`），在 0.2.1-rc.3、0.2.1-rc.5 和 0.2.2-alpha.2 上实测过。插件是纯 JavaScript，安装时不需要构建，也不需要打开 `allowBuilds`。
+需要 dsh **0.2.1-rc.5 及以上、0.3.0 以下**（`package.json` 的 `engines.dsh`）。0.2.0 preview 在 rc.5 验证，其它版本须核对插件接口；下方旧版本实测记录保留其原范围。插件是纯 JavaScript，安装时不需要构建，也不需要打开 `allowBuilds`。
 
-**桌面端**：点侧栏的「插件」（不是「设置」），再点页面右上角的「＋ 添加插件」（它旁边的下拉箭头里也有同一个入口「安装第三方插件」），在输入框里填 `github:Miint-Sunny/dsh-nai5-prompting#v0.1.6`，然后点「安装」。想防止标签被改动，就把 `v0.1.6` 换成 [Release 页](https://github.com/Miint-Sunny/dsh-nai5-prompting/releases)上写的那个提交号。输入框里也可以填本机仓库的目录路径。
+**桌面端**：点侧栏的「插件」（不是「设置」），再点页面右上角的「＋ 添加插件」（它旁边的下拉箭头里也有同一个入口「安装第三方插件」），在输入框里填 `github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.1`，然后点「安装」。想防止标签被改动，就把 `v0.2.0-preview.1` 换成 [Release 页](https://github.com/Miint-Sunny/dsh-nai-desk/releases)上写的那个提交号。输入框里也可以填本机仓库的目录路径。
 
 也可以用命令行：先 **⌘Q 完全退出桌面端**，再用桌面端自带的 dsh 安装：
 
 ```bash
-"/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" plugin --profile desktop add github:Miint-Sunny/dsh-nai5-prompting#v0.1.6
+"/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.1
 ```
 
-Release 页上附了打好的 `dsh-nai5-prompting-0.1.6.tgz`，下载后把上面的 `github:…` 换成这个文件的路径也能装，不用联网拉仓库。
+Release 页上附了打好的 `dsh-nai-desk-0.2.0-preview.1.tgz`，下载后把上面的 `github:…` 换成这个文件的路径也能装，不用联网拉仓库。
 
 **其他 profile**（例如 `dsh web`）：
 
 ```bash
-dsh plugin --profile web add github:Miint-Sunny/dsh-nai5-prompting#v0.1.6
+dsh plugin --profile web add github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.1
 ```
 
 卸载：在插件页关掉或移除这个插件；或者退出桌面端后运行 `dsh plugin --profile desktop remove dsh-nai5-prompting`。卸载后，用这个预设建的旧会话没法继续，装回来就能接着用。
@@ -53,7 +68,7 @@ dsh plugin --profile web add github:Miint-Sunny/dsh-nai5-prompting#v0.1.6
 1. 准备一个专门写提示词的目录作为工作区，例如 `~/NAI`。不要用代码仓库，免得混进别的文件。
 2. 在这个目录里放一份 `NAI.md`，写长期偏好、固定画师串、UC 和 OC 库的位置。模板见 [examples/studio/NAI.md](examples/studio/NAI.md)。每个会话都会自动读入它，压缩上下文后也会重新读入。
 3. 新建会话，选「NAI5 提示词」，直接说需求。默认会给出能直接复制的提示词：只给题材（例如“荷叶有关的场景”）或选了某个方向时，它先用几行写出替你补的画面方案，再给完整提示词，题材很开放时另附几个可换的方向。只想要点子、角色或服装设计、漫画分镜时，明确说“先给几个方向”“只要设计”就行。
-4. 要存东西时直接说，例如“把这个角色存进 OC 库”“存一下这版定稿”。不说就不写文件。
+4. 要存东西时直接说，例如“把这个角色存进 OC 库”“存一下这版定稿”。未明确要求时不写工作区文件；稿纸的自动保存是独立的会话伴随数据。
 5. 照图反推：在输入框里附上图片。需要选一个能看图的模型（例如内置目录里的 `deepseek-flash`）；模型不支持图片时，dsh 会直接拒收带图的消息。
 
 ## 记忆与上下文
@@ -98,7 +113,7 @@ npm install --ignore-scripts
 npm test
 ```
 
-测试覆盖：技能与 `vendor.json` 逐字节一致；补丁只插入一个预设、只挂允许的插件、系统提示词里没有会被插值的 `{{`；技能目录的路径表达式在 profile 布局下解析到 `skills/`；隔离插件在注册表替身上的行为。
+测试会先构建预编译包；覆盖稿纸同步、冲突、会话隔离和界面状态，以及技能与 `vendor.json` 逐字节一致；补丁只插入一个预设、只挂允许的插件、系统提示词里没有会被插值的 `{{`；技能目录的路径表达式在 profile 布局下解析到 `skills/`；隔离插件在注册表替身上的行为。
 
 ## 已验证
 

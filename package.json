@@ -1,7 +1,7 @@
 {
   "name": "dsh-nai5-prompting",
-  "version": "0.1.6",
-  "description": "DeepSeek Harness 的「NAI5 提示词」预设：用 nai5-prompting 的 11 个拆分技能构思和写 NovelAI V5 提示词；只交文本，与其他预设的工具和技能互不干涉",
+  "version": "0.2.0-preview.1",
+  "description": "NAI Desk：DeepSeek Harness 的 NAI5 提示词预设、11 个写词技能和可编辑右侧稿纸",
   "keywords": [
     "deepseek-harness",
     "dsh",
@@ -11,22 +11,27 @@
   ],
   "license": "GPL-3.0-only",
   "author": "Miint-Sunny",
-  "homepage": "https://github.com/Miint-Sunny/dsh-nai5-prompting#readme",
+  "homepage": "https://github.com/Miint-Sunny/dsh-nai-desk#readme",
   "bugs": {
-    "url": "https://github.com/Miint-Sunny/dsh-nai5-prompting/issues"
+    "url": "https://github.com/Miint-Sunny/dsh-nai-desk/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Miint-Sunny/dsh-nai5-prompting.git"
+    "url": "git+https://github.com/Miint-Sunny/dsh-nai-desk.git"
   },
   "type": "module",
   "main": "lib/index.js",
   "exports": {
-    ".": {
-      "default": "./lib/index.js"
-    },
+    ".": "./lib/index.js",
     "./package.json": "./package.json",
-    "./locale/*.json": "./locale/*.json"
+    "./locale/*.json": "./locale/*.json",
+    "./client": "./lib/client.js",
+    "./tools": "./lib/tools.js",
+    "./isolation": "./lib/isolation.js",
+    "./api": {
+      "types": "./src/api.d.ts"
+    },
+    "./host": "./lib/host.js"
   },
   "files": [
     "lib",
@@ -38,14 +43,22 @@
     "VENDOR.md",
     "README.md",
     "README.en.md",
-    "NOTICE"
+    "NOTICE",
+    "src",
+    "scripts",
+    "LICENSE",
+    "CHANGELOG.md",
+    "docs/verification-0.2.0-preview.1.md"
   ],
   "scripts": {
     "test": "node --test test/*.test.mjs",
-    "sync-skills": "node scripts/sync-skills.mjs"
+    "sync-skills": "node scripts/sync-skills.mjs",
+    "build": "node scripts/build.mjs",
+    "pretest": "npm run build"
   },
   "engines": {
-    "dsh": ">=0.2.1-rc.2 <0.3.0-0"
+    "dsh": ">=0.2.1-rc.5 <0.3.0-0",
+    "node": ">=22"
   },
   "peerDependencies": {
     "@deepseek-ai/schemastery": "^3.18.4"
@@ -57,11 +70,25 @@
   },
   "devDependencies": {
     "@deepseek-ai/schemastery": "3.18.4",
-    "yaml": "2.9.1"
+    "yaml": "2.9.1",
+    "esbuild": "0.25.12",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "zod": "4.4.3"
   },
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-slots",
+        "@deepseek-ai/dsh-client-ui-renderer",
+        "@deepseek-ai/dsh-client-ui-sidebar-right",
+        "@deepseek-ai/dsh-client-ui-session",
+        "@deepseek-ai/dsh-api-session-controller"
+      ]
     }
   }
 }

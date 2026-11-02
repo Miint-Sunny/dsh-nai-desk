@@ -1,16 +1,31 @@
-# dsh-nai5-prompting
+# NAI Desk
 
 [中文](README.md) | English
 
 Adds an "NAI5 提示词" (NAI5 prompting) agent preset to [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (dsh). The preset plans, designs, and writes NovelAI V5 prompts with the 11 split skills of [nai5-prompting](https://github.com/Miint-Sunny/nai5-prompting). It delivers text only and calls no image-generation API. It does not affect the other dsh presets, and they do not affect it.
 
+## 0.2.0 Preview: one package for the preset and sidebar
+
+Current version: **0.2.0-preview.1**. The repository is now `dsh-nai-desk` and the plugin display name is **NAI Desk**. The installation identity remains `dsh-nai5-prompting` and the preset ID remains `nai5-prompting`, retaining existing installations, sessions, history, and stable tags.
+
+- Base Prompt / UC tabs with full-column editing.
+- Per-character Prompt / UC, names, ordering, enable/disable, delete/undo, and folding.
+- Per-session persistence shared by model tools and manual edits, with revision conflicts that preserve unsaved local text.
+- Open the right sidebar in an NAI5 session and choose **提示词稿纸**. Select and copy text yourself into the NovelAI website.
+
+The default bundle includes everything; no second plugin or manual preset patch is needed. If your profile overrides the entire `preset-nai5-prompting` row, update it using [cordis.patch.yml](cordis.patch.yml). No dice, copy buttons, clipboard scripts, website filling, OC lookup, block library, MCP, or W.O.F connector is included.
+
+Types are in [src/api.d.ts](src/api.d.ts). Authenticated `POST /api/nai-desk/v1` supports read/mutate/watch for NAI5 sessions only. Drafts use the host's `nai_desk` storage domain, not custom session events. Limits: 32,768 characters per field, 1 MiB per draft, 22 characters. Forked sessions currently start with an empty draft; confirm changes are saved before closing or reloading.
+
+See [CHANGELOG.md](CHANGELOG.md) and the [verification report](docs/verification-0.2.0-preview.1.md). This is a prerelease; stable v0.1.6 and earlier tags remain available.
+
 ## What the preset contains
 
 Pick "NAI5 提示词" from the preset menu when you start a session (the button that shows "Standard mode" by default).
 
-- **System prompt**: replaced entirely by prompt-writing instructions; the coding instructions never appear. The instructions state what this environment can do: text only, no image generation or workbench writes, and NovelAI presets assumed off. The method itself comes from the skills.
+- **System prompt**: replaced entirely by prompt-writing instructions; the coding instructions never appear. The instructions state what this environment can do: text drafts in dsh, no image generation or website filling, and NovelAI presets assumed off. The method itself comes from the skills.
 - **Skills**: only the 11 split skills of nai5-prompting v1.2.8, copied byte for byte (see [VENDOR.md](VENDOR.md)).
-- **Tools**: loading skills, reading and writing workspace files, viewing images, asking you questions, and web search and fetch for checking tags and character names. There is no terminal, subagent, plan mode, todo list, or MCP. From dsh 0.2.2, a step omits web search when the current model route has no credentials for the search service.
+- **Tools**: loading skills, reading and writing workspace files, viewing images, asking you questions, web search and fetch for checking tags and character names, and draft read/write tools. There is no terminal, subagent, plan mode, todo list, or MCP. From dsh 0.2.2, a step omits web search when the current model route has no credentials for the search service.
 - **Long sessions**: automatic compaction near the context limit, plus a manual `/compact`.
 
 ## Isolation
@@ -22,34 +37,34 @@ Pick "NAI5 提示词" from the preset menu when you start a session (the button 
 | Tools | only the tools this preset mounts; MCP servers, host plugins, and other global tools are hidden | unchanged |
 | Workspace instruction files | only the workspace's `NAI.md`; `AGENTS.md` and `CLAUDE.md` are not read | unchanged; `NAI.md` is not read |
 
-Isolation applies to every session that uses this preset, including a blank session switched to it. The plugin registers no HTTP routes, writes no custom session events, and does not change the default preset.
+Isolation applies to every session that uses this preset, including a blank session switched to it. The draft route uses the host’s authenticated Connection without a separate listener, writes no custom session events, and does not change the default preset.
 
 Exception: dsh always reads the global instruction files `~/.dsh/AGENTS.md` and `~/.agents/AGENTS.md`, and no preset can turn them off. Keep coding rules in each repository's own `AGENTS.md` instead.
 
 ## Install
 
-Requires dsh **0.2.1-rc.2 or later, below 0.3.0** (`engines.dsh` in `package.json`); tested on 0.2.1-rc.3, 0.2.1-rc.5, and 0.2.2-alpha.2. The plugin is plain JavaScript: installation runs no build and needs no `allowBuilds` entry.
+Requires dsh **0.2.1-rc.5 or later, below 0.3.0** (`engines.dsh` in `package.json`). The 0.2.0 preview is verified on rc.5; other versions need compatibility checks. Historical results below retain their original scope. The plugin is plain JavaScript: installation runs no build and needs no `allowBuilds` entry.
 
-**Desktop**: select **Plugins** in the sidebar (not Settings), then **+ Add plugin** at the top right; the arrow beside it offers the same entry as **Install a third-party plugin**. Enter `github:Miint-Sunny/dsh-nai5-prompting#v0.1.6`, then select **Install**. To guard against a moved tag, replace `v0.1.6` with the commit listed on the [release page](https://github.com/Miint-Sunny/dsh-nai5-prompting/releases). The same field also takes the path of a local checkout. Alternatively, fully quit Desktop (⌘Q) and run its bundled CLI:
+**Desktop**: select **Plugins** in the sidebar (not Settings), then **+ Add plugin** at the top right; the arrow beside it offers the same entry as **Install a third-party plugin**. Enter `github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.1`, then select **Install**. To guard against a moved tag, replace `v0.2.0-preview.1` with the commit listed on the [release page](https://github.com/Miint-Sunny/dsh-nai-desk/releases). The same field also takes the path of a local checkout. Alternatively, fully quit Desktop (⌘Q) and run its bundled CLI:
 
 ```bash
-"/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" plugin --profile desktop add github:Miint-Sunny/dsh-nai5-prompting#v0.1.6
+"/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.1
 ```
 
 **Other profiles** (for example `dsh web`):
 
 ```bash
-dsh plugin --profile web add github:Miint-Sunny/dsh-nai5-prompting#v0.1.6
+dsh plugin --profile web add github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.1
 ```
 
-The release also carries `dsh-nai5-prompting-0.1.6.tgz`; its path works in place of the `github:` spec without fetching the repository. To uninstall, remove the plugin on the Plugins page, or quit Desktop and run `dsh plugin --profile desktop remove dsh-nai5-prompting`. Sessions created with this preset cannot resume while the plugin is uninstalled; reinstalling it restores them.
+The release also carries `dsh-nai-desk-0.2.0-preview.1.tgz`; its path works in place of the `github:` spec without fetching the repository. To uninstall, remove the plugin on the Plugins page, or quit Desktop and run `dsh plugin --profile desktop remove dsh-nai5-prompting`. Sessions created with this preset cannot resume while the plugin is uninstalled; reinstalling it restores them.
 
 ## Use
 
 1. Make a dedicated directory for prompt work, such as `~/NAI`, and add it as a workspace. Avoid code repositories.
 2. Put an `NAI.md` there with long-term preferences, fixed artist strings, your UC, and where your OC sheets live; start from [examples/studio/NAI.md](examples/studio/NAI.md). Every session reads it, and it is read again after compaction.
 3. Start a session with the "NAI5 提示词" preset and describe what you want. The default deliverable is a ready-to-copy prompt: given only a subject (such as "a scene with lotus leaves") or a chosen direction, it first states the picture decisions it filled in, in a few lines, then gives the complete prompt, adding a few alternative directions when the subject is open. Say "just give me directions" or "design only" when you want ideas, character or outfit designs, or comic storyboards without a prompt.
-4. Ask explicitly when something should be saved ("save this character to the OC library"). Nothing is written otherwise.
+4. Ask explicitly when something should be saved ("save this character to the OC library"). Workspace files are written only on request; automatic draft persistence is separate session companion data.
 5. Prompt reverse-engineering from an image needs a model with image input, such as `deepseek-flash` in the built-in catalog; dsh refuses image messages for text-only models.
 
 ## Memory and context

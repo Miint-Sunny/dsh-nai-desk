@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { parse } from 'yaml'
-import { Config } from '../lib/index.js'
+import { Config } from '../src/isolation.js'
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url))
 const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'))
@@ -14,7 +14,8 @@ const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'))
 /** `!!js` values stay recognizable instead of being evaluated. */
 const jsTag = { tag: 'tag:yaml.org,2002:js', resolve: source => ({ js: source }) }
 const patch = parse(readFileSync(join(ROOT, 'cordis.patch.yml'), 'utf8'), { customTags: [jsTag] })
-const preset = patch[0].insert[0]
+const inserted = patch.flatMap(layer => layer.insert ?? [])
+const preset = inserted.find(entry => entry.id === 'preset-nai5-prompting')
 const rows = preset.config.plugins
 const row = id => rows.find(entry => entry.id === id)
 
@@ -31,6 +32,7 @@ const ALLOWED_PLUGINS = new Set([
   '@deepseek-ai/dsh-command-compact',
   'cordis:group',
   pkg.name,
+  `${pkg.name}/tools`,
 ])
 
 function walk(entries, visit) {
@@ -43,14 +45,17 @@ function walk(entries, visit) {
 test('package.json declares the bundle, its engine range and the export the skill path needs', () => {
   assert.equal(pkg.dsh.bundle.patch, './cordis.patch.yml')
   assert.ok(existsSync(join(ROOT, pkg.dsh.bundle.patch)))
-  assert.match(pkg.engines.dsh, /^>=0\.2\.1-rc\.2 /)
+  assert.match(pkg.engines.dsh, /^>=0\.2\.1-rc\.5 /)
   assert.equal(pkg.exports['./package.json'], './package.json')
   for (const entry of ['lib', 'skills', 'cordis.patch.yml', 'vendor.json']) assert.ok(pkg.files.includes(entry), entry)
 })
 
 test('the patch inserts exactly one agent preset row', () => {
   assert.equal(patch.length, 1)
-  assert.equal(patch[0].insert.length, 1)
+  assert.equal(inserted.length, 2)
+  assert.equal(inserted.find(entry => entry.id === 'nai-desk').name, pkg.name)
+  assert.deepEqual(inserted.find(entry => entry.id === 'nai-desk').config, { mode: 'desk' })
+  assert.equal(rows.find(entry => entry.id === 'nai-desk-tools').name, `${pkg.name}/tools`)
   assert.equal(preset.id, 'preset-nai5-prompting')
   assert.equal(preset.name, '@deepseek-ai/dsh-agent-preset')
   assert.equal(preset.config.id, 'nai5-prompting')

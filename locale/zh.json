@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "NAI5 提示词",
-    "description": "「NAI5 提示词」预设：用 nai5-prompting 的 11 个技能构思和写 NovelAI V5 提示词；只交文本，与其他预设的工具和技能互不干涉。"
+    "title": "NAI Desk",
+    "description": "NAI5 提示词预设、11 个写词技能和右侧可编辑稿纸；按会话保存，与其他模式隔离。"
   }
 }

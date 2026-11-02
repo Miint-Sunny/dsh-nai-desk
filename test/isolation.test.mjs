@@ -1,7 +1,7 @@
 // Isolation behaviour against minimal stand-ins for the tools and skills registries.
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { apply, Config, hideGlobalSkills, hideGlobalTools, SHADOW_PROVIDER, SHADOW_RANK, shadowCandidates } from '../lib/index.js'
+import { apply, Config, hideGlobalSkills, hideGlobalTools, SHADOW_PROVIDER, SHADOW_RANK, shadowCandidates } from '../src/isolation.js'
 
 /** Stand-in context: global tool names, recorded restrictions, listeners and warnings. */
 function fakeContext({ globalTools = [], globalSkills = [], restrictFails = 0 } = {}) {
