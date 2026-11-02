@@ -68,7 +68,7 @@ export function createDeskHandler({ store, isNaiSession }) {
     } catch (error) {
       if (request.signal.aborted || error?.name === 'AbortError') return errorReply('cancelled', '请求已取消', 499)
       if (error instanceof DeskError) return errorReply(error.code, error.message, statusCodes[error.code] ?? 500, error.current)
-      return errorReply('storage_error', '草稿读写失败，请保留未保存内容后重试。', 500)
+      return errorReply('storage_error', '无法读写稿纸，请保留未保存的内容后重试。', 500)
     }
   }
 }

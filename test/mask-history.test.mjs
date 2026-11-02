@@ -64,7 +64,7 @@ test('history records who wrote, merges bursts, keeps an earlier baseline and re
   tick(1000)
   s = await run('desk_set_character', { expected_revision: s.revision + 1, n: 1, prompt: 'girl' })
   let history = await store.history('s')
-  assert.deepEqual(history.steps.map(step => [step.source, step.parts]), [['user', ['主提示词']], ['model', ['主提示词', '新增 Character 1']]])
+  assert.deepEqual(history.steps.map(step => [step.source, step.parts]), [['user', ['主提示词']], ['model', ['主提示词', '添加 Character 1']]])
   assert.equal(history.steps.at(-1).revision, s.revision)
   assert.equal(history.steps[0].state, undefined)
   const old = await store.version('s', history.steps[0].revision)

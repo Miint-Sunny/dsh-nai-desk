@@ -88,12 +88,12 @@ function textField(state, field) {
   const match = typeof field === 'string' ? /^character:([a-zA-Z0-9_-]{1,128}):(prompt|uc)$/.exec(field) : null
   if (!match) invalid('field 必须是 main、uc 或 character:<id>:prompt|uc')
   const owner = state.characters.find(c => c.id === match[1])
-  if (!owner) throw new DeskError('not_found', '角色提示词条目不存在，请重新读取草稿后操作。')
+  if (!owner) throw new DeskError('not_found', '该角色不存在，请重新读取稿纸后操作。')
   return { owner, key: match[2] }
 }
 
 function withinSize(state) {
-  if (Buffer.byteLength(JSON.stringify(state)) > LIMITS.recordBytes) throw new DeskError('limit_exceeded', '草稿序列化大小超过 1 MiB，请减少内容后提交。')
+  if (Buffer.byteLength(JSON.stringify(state)) > LIMITS.recordBytes) throw new DeskError('limit_exceeded', '稿纸序列化大小超过 1 MiB，请减少内容后提交。')
   return state
 }
 
@@ -101,7 +101,7 @@ function withinSize(state) {
 export function validateRecord(value, id) {
   try {
     object(value, ['schemaVersion', 'sessionId', 'revision', 'main', 'uc', 'characters', 'mask', 'secrets', 'updatedBy'], 'record')
-    if (value.schemaVersion !== 1 || value.sessionId !== id) invalid('草稿格式版本或会话标识不匹配。')
+    if (value.schemaVersion !== 1 || value.sessionId !== id) invalid('稿纸格式版本或会话标识不匹配。')
     integer(value.revision, 0, Number.MAX_SAFE_INTEGER, 'revision')
     text(value.main, '主提示词')
     text(value.uc, '总 UC')
@@ -118,7 +118,7 @@ export function validateRecord(value, id) {
     }
     return structuredClone(withinSize(value))
   } catch (error) {
-    throw new DeskError('invalid_record', `草稿数据不符合当前格式，无法加载：${error.message}`)
+    throw new DeskError('invalid_record', `稿纸数据不符合当前格式，无法读取：${error.message}`)
   }
 }
 
@@ -130,7 +130,7 @@ function applyOperation(state, operation, idFactory, internal = false) {
   const find = id => {
     sessionKey(id)
     const index = next.characters.findIndex(c => c.id === id)
-    if (index < 0) throw new DeskError('not_found', '角色提示词条目不存在，请重新读取草稿后操作。')
+    if (index < 0) throw new DeskError('not_found', '该角色不存在，请重新读取稿纸后操作。')
     return index
   }
   switch (operation.type) {
@@ -142,7 +142,7 @@ function applyOperation(state, operation, idFactory, internal = false) {
     }
     case 'add_character': {
       object(operation, ['type', 'character', 'index'], 'operation')
-      if (next.characters.length >= LIMITS.characters) throw new DeskError('limit_exceeded', `草稿最多包含 ${LIMITS.characters} 条角色提示词。`)
+      if (next.characters.length >= LIMITS.characters) throw new DeskError('limit_exceeded', `稿纸最多包含 ${LIMITS.characters} 个角色。`)
       const index = operation.index === undefined ? next.characters.length : integer(operation.index, 0, next.characters.length, 'index')
       const added = character(operation.character ?? {}, index + 1, idFactory)
       if (next.characters.some(c => c.id === added.id)) invalid('角色 id 已存在')
@@ -195,7 +195,7 @@ function applyOperation(state, operation, idFactory, internal = false) {
     case 'mask_span': {
       object(operation, ['type', 'field', 'text', 'token', 'secret'], 'operation')
       if (typeof operation.token !== 'string' || !tokenPattern.test(operation.token)) invalid('token 格式无效')
-      if (next.secrets?.[operation.token] !== undefined) invalid('该屏蔽占位已被使用，请重新读取草稿。')
+      if (next.secrets?.[operation.token] !== undefined) invalid('该屏蔽占位已被使用，请重新读取稿纸。')
       if (!text(operation.secret, '屏蔽内容').trim()) invalid('屏蔽内容不能为空')
       const value = text(operation.text, '提示词')
       if (!value.includes(operation.token)) invalid('text 中缺少新的屏蔽占位')
@@ -207,7 +207,7 @@ function applyOperation(state, operation, idFactory, internal = false) {
     case 'unmask': {
       object(operation, ['type', 'token'], 'operation')
       const secret = next.secrets?.[operation.token]
-      if (secret === undefined) throw new DeskError('not_found', '该屏蔽内容不存在，请重新读取草稿。')
+      if (secret === undefined) throw new DeskError('not_found', '该屏蔽内容不存在，请重新读取稿纸。')
       const reveal = (value, label) => text(value.split(operation.token).join(secret), label)
       next.main = reveal(next.main, '主提示词')
       next.uc = reveal(next.uc, '总 UC')
@@ -217,14 +217,14 @@ function applyOperation(state, operation, idFactory, internal = false) {
       break
     }
     case 'replace': {
-      if (!internal) invalid('不支持该草稿操作。')
+      if (!internal) invalid('不支持该稿纸操作。')
       for (const key of ['main', 'uc', 'characters', 'mask', 'secrets']) {
         if (operation.state[key] === undefined) delete next[key]
         else next[key] = structuredClone(operation.state[key])
       }
       break
     }
-    default: invalid('不支持该草稿操作。')
+    default: invalid('不支持该稿纸操作。')
   }
   next.revision = integer(state.revision + 1, 1, Number.MAX_SAFE_INTEGER, 'revision')
   return withinSize(next)
@@ -241,14 +241,14 @@ export function describeChange(before, after) {
   const old = new Map(before.characters.map((c, i) => [c.id, c]))
   after.characters.forEach((c, i) => {
     const previous = old.get(c.id)
-    if (!previous) parts.push(`新增 ${label(c, i)}`)
+    if (!previous) parts.push(`添加 ${label(c, i)}`)
     else if (JSON.stringify(previous) !== JSON.stringify(c)) parts.push(label(c, i))
   })
   const kept = new Set(after.characters.map(c => c.id))
   before.characters.forEach((c, i) => { if (!kept.has(c.id)) parts.push(`删除 ${label(c, i)}`) })
   const order = list => list.filter(c => old.has(c.id) && kept.has(c.id)).map(c => c.id).join()
   if (order(before.characters) !== order(after.characters)) parts.push('角色顺序')
-  if (JSON.stringify(before.mask ?? {}) !== JSON.stringify(after.mask ?? {}) || JSON.stringify(Object.keys(before.secrets ?? {})) !== JSON.stringify(Object.keys(after.secrets ?? {}))) parts.push('屏蔽')
+  if (JSON.stringify(before.mask ?? {}) !== JSON.stringify(after.mask ?? {}) || JSON.stringify(Object.keys(before.secrets ?? {})) !== JSON.stringify(Object.keys(after.secrets ?? {}))) parts.push('屏蔽设置')
   return [...new Set(parts)]
 }
 
@@ -278,7 +278,7 @@ export class DeskStore {
   }
 
   #assertOpen() {
-    if (this.#closed) throw new DeskError('closed', '草稿服务已关闭，请重新连接后重试。')
+    if (this.#closed) throw new DeskError('closed', '稿纸服务已关闭，请重新连接后重试。')
   }
 
   async #load(id) {
@@ -317,7 +317,7 @@ export class DeskStore {
     sessionKey(id)
     integer(revision, 0, Number.MAX_SAFE_INTEGER, 'revision')
     const step = (await this.#loadHistory(id)).steps.find(item => item.revision === revision)
-    if (!step) throw new DeskError('not_found', '这一步已不在历史记录中，请刷新历史。')
+    if (!step) throw new DeskError('not_found', '该版本已不在版本历史中，请刷新后重试。')
     return { sessionId: id, revision, ...structuredClone(step.state) }
   }
 
@@ -353,7 +353,7 @@ export class DeskStore {
     const current = previous.catch(() => {}).then(async () => {
       this.#assertOpen()
       const before = await this.#load(id)
-      if (before.revision !== expectedRevision) throw new DeskError('conflict', '草稿版本已变化，请重新读取后提交。', before)
+      if (before.revision !== expectedRevision) throw new DeskError('conflict', '稿纸已被修改，请重新读取后提交。', before)
       const restored = isObject(op) && op.type === 'restore'
       let next
       if (restored) {
@@ -407,7 +407,7 @@ export class DeskStore {
 
   async close() {
     this.#closed = true
-    for (const listeners of this.#listeners.values()) for (const listener of [...listeners]) listener(new DeskError('closed', '草稿服务已关闭，请重新连接后重试。'))
+    for (const listeners of this.#listeners.values()) for (const listener of [...listeners]) listener(new DeskError('closed', '稿纸服务已关闭，请重新连接后重试。'))
     this.#listeners.clear()
     await Promise.allSettled([...this.#tails.values()])
     this.#loaded.clear()

@@ -9,7 +9,7 @@ function label(name, argsRaw) {
     case 'desk_set_main': return '主提示词'
     case 'desk_set_uc': return 'UC'
     case 'desk_set_character': return `角色 ${n}`
-    case 'desk_remove_character': return `删除角色 ${n}`
+    case 'desk_remove_character': return `角色 ${n}（已删除）`
     default: return '角色顺序'
   }
 }

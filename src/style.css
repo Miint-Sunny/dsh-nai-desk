@@ -4,6 +4,7 @@
  * - Cards: the composer and in-chat card material — input-major fill, border 0,
  *   and the elevation shadow whose first layer is the 0.5px translucent stroke.
  * - Add row: the Models page dashed "add" button. Chat card: the plan card.
+ * - Character actions: the host Menu card behind an ellipsis tool.
  * The host owns colors, fonts, radii and focus. No local palette.
  */
 .nai-desk {
@@ -19,12 +20,12 @@
 
 /* Header: same frame as the Workspace files tab, so its seam lines up with the conversation header. */
 .nai-desk .nd-header {
-  flex: none; display: flex; align-items: center; gap: 4px; height: 38px; padding: 0 6px 0 16px;
+  flex: none; display: flex; align-items: center; gap: 4px; height: 38px; padding-block: 0; padding-inline: 16px 6px;
   border-bottom: .5px solid var(--dsw-alias-border-l3);
 }
-.nai-desk .nd-steps { display: flex; align-items: center; gap: 0; margin-right: 2px; }
+.nai-desk .nd-steps { display: flex; align-items: center; gap: 0; margin-inline-end: 2px; }
 .nai-desk .nd-step-count { min-width: 40px; color: var(--dsw-alias-label-tertiary); font-size: 12px; line-height: 18px; text-align: center; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.nai-desk .nd-status { margin-right: auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--dsw-alias-label-tertiary); font-size: 12px; line-height: 18px; }
+.nai-desk .nd-status { margin-inline-end: auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--dsw-alias-label-tertiary); font-size: 12px; line-height: 18px; }
 .nai-desk .nd-status[data-tone="error"] { color: var(--dsw-alias-state-error-primary); }
 .nai-desk .nd-status[data-tone="warn"] { color: var(--dsw-alias-state-warn-label); }
 .nai-desk .nd-tool {
@@ -33,18 +34,21 @@
 }
 .nai-desk .nd-tool[aria-pressed="true"] { color: var(--dsw-alias-label-primary); background: var(--dsw-alias-interactive-bg-hover); }
 .nai-desk .nd-tool:disabled { opacity: .4; cursor: default; }
+/* History versions: state controls stay readable and focusable but do nothing. */
+.nai-desk .nd-tool[aria-disabled="true"], .nai-desk .nd-switch[aria-disabled="true"] { opacity: .5; cursor: default; }
+.nai-desk .nd-visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 
 .nai-desk .nd-body { flex: 1 1 auto; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 12px; padding: 12px 16px 16px; }
 .nai-desk .nd-body > .nd-base, .nai-desk .nd-body > .nd-characters { transition: opacity 120ms ease; }
 .nai-desk .nd-body[aria-busy="true"] > .nd-base, .nai-desk .nd-body[aria-busy="true"] > .nd-characters { opacity: .55; }
 .nai-desk .nd-history-bar {
   position: sticky; top: -12px; z-index: 2; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
-  margin: -12px -16px 0; padding: 8px 12px 8px 16px; background: var(--dsw-alias-bg-base);
+  margin: -12px -16px 0; padding-block: 8px; padding-inline: 16px 12px; background: var(--dsw-alias-bg-base);
   border-bottom: .5px solid var(--dsw-alias-border-l3); font-size: 12px; line-height: 18px; color: var(--dsw-alias-label-tertiary);
 }
 .nai-desk .nd-history-meta { display: flex; flex-wrap: wrap; gap: 0 8px; min-width: 0; }
 .nai-desk .nd-history-meta strong { color: var(--dsw-alias-label-primary); font-weight: 500; }
-.nai-desk .nd-history-actions { display: flex; gap: 6px; margin-left: auto; }
+.nai-desk .nd-history-actions { display: flex; gap: 6px; margin-inline-start: auto; }
 
 /* Glass card: no border; the stroke is the first layer of the elevation shadow
  * and is rebound per element, as on the composer and in-chat cards. */
@@ -58,10 +62,6 @@
 .nai-desk .nd-card:has(.nd-editor:focus) { --dsw-elevation-stroke-color: var(--dsw-alias-state-business-primary); }
 .nai-desk .nd-card-head { display: flex; align-items: center; gap: 6px; min-height: 28px; min-width: 0; }
 .nai-desk .nd-head-fill { flex: 1 1 auto; }
-.nai-desk .nd-tag {
-  flex: none; padding: 1px 6px; border: .5px solid var(--dsw-alias-border-l3); border-radius: var(--dsw-radius-xs);
-  color: var(--dsw-alias-label-secondary); font-size: 11px; line-height: 16px; white-space: nowrap;
-}
 .nai-desk .nd-card-body { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 /* The textarea and the layer behind it share every box and text metric so placeholder chips line up. */
 .nai-desk .nd-editor-wrap { position: relative; min-width: 0; }
@@ -83,11 +83,11 @@
 .nai-desk .nd-editor[readonly] { cursor: default; }
 .nai-desk .nd-hint {
   display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0;
-  padding: 6px 0 0; border-top: .5px solid var(--dsw-alias-border-l2); font-size: 12px; line-height: 18px; color: var(--dsw-alias-label-tertiary);
+  font-size: 12px; line-height: 18px; color: var(--dsw-alias-label-tertiary);
 }
 .nai-desk .nd-hint-text { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .nai-desk .nd-hint-text .nd-token { flex: none; padding: 0 4px; color: var(--dsw-alias-label-secondary); }
-.nai-desk .nd-hint-secret { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--dsw-alias-label-secondary); }
+.nai-desk .nd-hint-secret { min-width: 0; overflow-wrap: anywhere; white-space: pre-wrap; color: var(--dsw-alias-label-secondary); }
 .nai-desk .nd-hint .nd-button { gap: 4px; }
 .nai-desk .nd-editor::placeholder { color: var(--dsw-alias-label-caption); opacity: 1; }
 
@@ -97,7 +97,7 @@
   gap: 2px; padding: 4px; border-radius: var(--dsw-radius-md); background: var(--dsw-alias-interactive-bg-hover); min-width: 0;
 }
 .nai-desk .nd-tab-indicator {
-  position: absolute; top: 4px; left: 4px;
+  position: absolute; top: 4px; inset-inline-start: 4px;
   width: calc((100% - 8px - 2px * (var(--nd-segment-count) - 1)) / var(--nd-segment-count));
   height: calc(100% - 8px); border: 0; border-radius: var(--dsw-radius-sm);
   background: var(--dsw-alias-bg-layer-1); box-shadow: var(--dsw-elevation-soft);
@@ -108,16 +108,17 @@
   position: relative; z-index: 1; height: 28px; padding: 0 16px; border: 0; border-radius: var(--dsw-radius-sm);
   background: transparent; color: var(--dsw-alias-label-secondary); font-size: 13px; line-height: 20px; font-weight: 500; white-space: nowrap; cursor: pointer;
 }
+.nai-desk:dir(rtl) .nd-tab-indicator { transform: translateX(calc(var(--nd-segment-index) * (-100% - 2px))); }
+.nai-desk .nd-tab { display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
 .nai-desk .nd-tab[aria-selected="true"] { color: var(--dsw-alias-label-primary); }
+.nai-desk .nd-tab-mark { display: inline-flex; color: var(--dsw-alias-label-tertiary); }
+.nai-desk .nd-tab-mark svg { width: 14px; height: 14px; }
 
-/* Characters: settings rows with an inline-editable name. */
-.nai-desk .nd-characters { display: flex; flex-direction: column; gap: 12px; }
-.nai-desk .nd-section-label {
-  display: flex; align-items: baseline; gap: 6px; margin: 4px 2px 0;
-  color: var(--dsw-alias-label-secondary); font-size: 12px; line-height: 18px; font-weight: 500;
-}
-.nai-desk .nd-section-label span:last-child { color: var(--dsw-alias-label-tertiary); font-variant-numeric: tabular-nums; }
-.nai-desk .nd-gender { display: inline-flex; flex: none; padding-left: 2px; color: var(--dsw-alias-label-tertiary); }
+/* Characters: settings rows with an inline-editable name. Space, not a heading,
+ * separates them from the base card: 24px between the groups, 12px within. */
+.nai-desk .nd-characters { display: flex; flex-direction: column; gap: 12px; margin-block-start: 12px; }
+.nai-desk .nd-notice-region:empty { margin-block-start: -12px; }
+.nai-desk .nd-gender { display: inline-flex; flex: none; padding-inline-start: 2px; color: var(--dsw-alias-label-tertiary); }
 .nai-desk .nd-name {
   flex: 1 1 auto; min-width: 0; height: 28px; padding: 0 6px; border: .5px solid transparent; border-radius: var(--dsw-radius-sm);
   outline: none; background: transparent; color: var(--dsw-alias-label-primary); font-size: 14px; line-height: 22px; font-weight: 500;
@@ -126,7 +127,7 @@
 .nai-desk .nd-name::placeholder { color: var(--dsw-alias-label-caption); opacity: 1; }
 .nai-desk .nd-name:not([readonly]):focus { border-color: var(--dsw-alias-state-business-primary); }
 .nai-desk .nd-actions { display: flex; align-items: center; gap: 2px; flex: none; }
-.nai-desk .nd-actions .nd-switch { margin-right: 6px; }
+.nai-desk .nd-actions .nd-switch { margin-inline: 4px; }
 .nai-desk .nd-disabled .nd-name, .nai-desk .nd-disabled .nd-gender { color: var(--dsw-alias-label-tertiary); }
 .nai-desk .nd-disabled .nd-card-body { opacity: .5; }
 
@@ -151,6 +152,29 @@
   color: var(--dsw-alias-label-primary); font-size: 14px; line-height: 20px; cursor: pointer;
 }
 .nai-desk .nd-creator:disabled { opacity: .4; cursor: default; }
+
+/* Action menu: the host's translucent menu card, 34px rows, destructive row in the error color. */
+.nai-desk .nd-menu { position: relative; display: inline-flex; flex: none; }
+.nai-desk .nd-menu-list {
+  position: absolute; top: calc(100% + 4px); inset-inline-end: 0; z-index: 100; box-sizing: border-box;
+  display: flex; flex-direction: column; min-width: 144px; max-width: 360px; padding: 4px;
+  border: 0; border-radius: var(--dsw-radius-lg); background: var(--dsw-menu-surface-fill); backdrop-filter: var(--dsw-menu-backdrop-filter);
+  --dsw-elevation-stroke-color: var(--dsw-alias-border-l1); box-shadow: var(--dsw-elevation-prominent);
+}
+.nai-desk .nd-menu-above { top: auto; bottom: calc(100% + 4px); }
+.nai-desk .nd-menu-item {
+  display: flex; align-items: center; gap: 6px; width: 100%; min-height: 34px; padding: 6px 8px;
+  border: none; border-radius: var(--dsw-radius-md); background: transparent; cursor: pointer;
+  color: var(--dsw-alias-label-primary); font-size: 13px; line-height: 20px; text-align: start;
+}
+.nai-desk .nd-menu-item:focus-visible:not(:disabled) { background: var(--dsw-alias-interactive-bg-hover); outline: none; }
+.nai-desk .nd-menu-item:disabled { opacity: .4; cursor: not-allowed; }
+.nai-desk .nd-menu-icon { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 14px; height: 14px; color: var(--dsw-alias-menu-icon); }
+.nai-desk .nd-menu-icon svg { width: 14px; height: 14px; }
+.nai-desk .nd-menu-label { flex: 1; min-width: 0; white-space: nowrap; }
+.nai-desk .nd-menu-danger, .nai-desk .nd-menu-danger .nd-menu-icon { color: var(--dsw-alias-state-error-primary); }
+.nai-desk .nd-menu-danger:focus-visible:not(:disabled) { background: var(--dsw-alias-interactive-bg-hover-danger); }
+.nai-desk .nd-menu-separator { height: .5px; margin: 3px 2px; background: var(--dsw-alias-border-l2); }
 
 /* Button: compact 28/R8, standard 36/R12. */
 .nai-desk .nd-button {
@@ -184,6 +208,7 @@
   border: .5px solid var(--dsw-alias-border-l4); border-radius: var(--dsw-radius-sm);
   background: var(--dsw-alias-bg-base); color: var(--dsw-alias-label-primary); font-size: 13px; line-height: 20px;
 }
+.nai-desk .nd-conflict textarea:focus-visible { border-color: var(--dsw-alias-state-business-primary); }
 .nai-desk .nd-conflict-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 
 .nai-desk.nd-message { height: auto; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding: 12px 16px; color: var(--dsw-alias-label-secondary); line-height: 1.6; }
@@ -198,18 +223,17 @@
 }
 .nai-desk .nd-switch:focus-visible { outline: var(--dsw-focus-ring-width) solid var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary)); outline-offset: 2px; }
 @media (hover: hover) {
-  .nai-desk .nd-tool:hover:not(:disabled) { color: var(--dsw-alias-label-primary); background: var(--dsw-alias-interactive-bg-hover); }
-  .nai-desk .nd-tool-danger:hover:not(:disabled) { color: var(--dsw-alias-state-error-primary); background: var(--dsw-alias-interactive-bg-hover-danger); }
+  .nai-desk .nd-tool:hover:not(:disabled):not([aria-disabled="true"]) { color: var(--dsw-alias-label-primary); background: var(--dsw-alias-interactive-bg-hover); }
+  .nai-desk .nd-menu-item:hover:not(:disabled) { background: var(--dsw-alias-interactive-bg-hover); }
+  .nai-desk .nd-menu-danger:hover:not(:disabled) { background: var(--dsw-alias-interactive-bg-hover-danger); }
+  .nd-turn-card:hover { background: var(--nd-turn-card-hover); }
   .nai-desk .nd-button:hover:not(:disabled), .nai-desk .nd-creator:hover:not(:disabled), .nai-desk .nd-name:not([readonly]):hover:not(:focus) { background: var(--dsw-alias-interactive-bg-hover); }
   .nai-desk .nd-button-primary:hover:not(:disabled) { background: var(--dsw-alias-button-primary-hover); }
   .nai-desk .nd-tab:hover { color: var(--dsw-alias-label-primary); }
 }
+/* The character head keeps one line down to 320px; only the gutters and tabs tighten. */
 @container (max-width: 370px) {
-  .nai-desk .nd-card-head .nd-tag { display: none; }
   .nai-desk .nd-body { padding-inline: 12px; }
-  .nai-desk .nd-character .nd-card-head { flex-wrap: wrap; }
-  .nai-desk .nd-name { flex-basis: calc(100% - 26px); }
-  .nai-desk .nd-actions { margin-left: auto; }
   .nai-desk .nd-tab { padding-inline: 12px; }
 }
 @media (pointer: coarse) {
@@ -227,10 +251,9 @@
   --nd-turn-card-fill: var(--dsw-static-neutral-50); --nd-turn-card-hover: var(--dsw-static-neutral-100);
   box-sizing: border-box; display: flex; align-items: center; gap: 10px; width: 100%; min-width: 0; height: 60px; margin: 0; padding: 8px 10px;
   border: .5px solid var(--dsw-alias-border-l1); border-radius: var(--dsw-radius-lg); background: var(--nd-turn-card-fill);
-  color: var(--dsw-alias-label-primary); font: inherit; text-align: left; cursor: pointer; transition: background-color 120ms ease;
+  color: var(--dsw-alias-label-primary); font: inherit; text-align: start; cursor: pointer; transition: background-color 120ms ease;
 }
 body[data-ds-dark-theme] .nd-turn-card { --nd-turn-card-fill: var(--dsw-static-neutral-850); --nd-turn-card-hover: var(--dsw-static-neutral-800); }
-.nd-turn-card:hover { background: var(--nd-turn-card-hover); }
 .nd-turn-card:focus-visible { outline: var(--dsw-focus-ring-width) solid var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary)); outline-offset: 3px; }
 .nd-turn-card-icon {
   box-sizing: border-box; flex: none; display: grid; place-items: center; width: 40px; height: 40px; border: .5px solid var(--dsw-alias-border-l1);

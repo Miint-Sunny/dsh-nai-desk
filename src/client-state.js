@@ -3,7 +3,7 @@
 function fieldParts(field) {
   if (field === 'main' || field === 'uc') return { key: field }
   const match = /^character:([a-zA-Z0-9_-]+):(prompt|uc|name)$/.exec(field)
-  if (!match) throw new Error('草稿字段标识无效。')
+  if (!match) throw new Error('稿纸字段标识无效。')
   return { id: match[1], key: match[2] }
 }
 
@@ -18,10 +18,10 @@ function operationFor(field, value) {
 }
 
 function checkedSnapshot(value, sessionId) {
-  if (value?.schemaVersion !== 1 || value.sessionId !== sessionId || !Number.isSafeInteger(value.revision) || value.revision < 0 || typeof value.main !== 'string' || typeof value.uc !== 'string' || !Array.isArray(value.characters)) throw new Error('收到的草稿格式或会话标识不匹配，请保留未保存内容后重试。')
+  if (value?.schemaVersion !== 1 || value.sessionId !== sessionId || !Number.isSafeInteger(value.revision) || value.revision < 0 || typeof value.main !== 'string' || typeof value.uc !== 'string' || !Array.isArray(value.characters)) throw new Error('收到的稿纸数据与当前会话不匹配。请保留未保存的内容后重试。')
   const ids = new Set()
   for (const c of value.characters) {
-    if (!c || typeof c.id !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(c.id) || ids.has(c.id) || typeof c.prompt !== 'string' || typeof c.uc !== 'string' || typeof c.name !== 'string' || typeof c.enabled !== 'boolean') throw new Error('收到的角色提示词数据格式无效，请保留未保存内容后重试。')
+    if (!c || typeof c.id !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(c.id) || ids.has(c.id) || typeof c.prompt !== 'string' || typeof c.uc !== 'string' || typeof c.name !== 'string' || typeof c.enabled !== 'boolean') throw new Error('收到的角色数据格式无效。请保留未保存的内容后重试。')
     ids.add(c.id)
   }
   return structuredClone(value)
@@ -104,7 +104,7 @@ export class DeskClient {
       const remote = fieldValue(snapshot, field)
       if (remote !== conflict.remote) this.#conflicts.set(field, {
         ...conflict, remote, deleted: remote === undefined, revision: snapshot.revision,
-        notice: '已保存版本再次更新，请重新比较后选择保留的内容。',
+        notice: '已保存的版本又有更新，请重新比较后再选择。',
       })
     }
   }
@@ -135,10 +135,10 @@ export class DeskClient {
   }
 
   edit(field, value, { deferSave = false } = {}) {
-    if (this.#closed || !this.#server) throw new Error('草稿尚未加载完成，请稍候再编辑。')
+    if (this.#closed || !this.#server) throw new Error('稿纸尚未读取完成，请稍候再编辑。')
     if (typeof value !== 'string') throw new Error('提示词字段必须是字符串。')
     const current = fieldValue(this.#server, field)
-    if (current === undefined) throw new Error('角色提示词条目已删除，请检查当前草稿。')
+    if (current === undefined) throw new Error('该角色已被删除，请检查当前稿纸。')
     const previous = this.#pending.get(field)
     this.#pending.set(field, { value, base: previous ? previous.base : current, version: ++this.#version })
     if (this.#conflicts.has(field)) this.#conflicts.set(field, { ...this.#conflicts.get(field), local: value })
@@ -195,14 +195,14 @@ export class DeskClient {
     const conflict = this.#conflicts.get(field)
     if (!pending || !conflict) return
     if (shownRevision !== conflict.revision) {
-      this.#conflicts.set(field, { ...conflict, notice: '已保存版本再次更新，请重新比较后选择保留的内容。' })
+      this.#conflicts.set(field, { ...conflict, notice: '已保存的版本又有更新，请重新比较后再选择。' })
       this.#publish()
       return
     }
     if (choice === 'remote') this.#pending.delete(field)
     else if (choice === 'local') {
       const remote = fieldValue(this.#server, field)
-      if (remote === undefined) throw new Error('该角色提示词已删除。先从冲突框保留未保存内容，再决定是否新建角色条目。')
+      if (remote === undefined) throw new Error('该角色已被删除。先复制未保存的内容，再决定是否添加新角色。')
       pending.base = remote
     } else throw new Error('冲突处理方式必须是 local 或 remote。')
     this.#conflicts.delete(field)
@@ -216,8 +216,8 @@ export class DeskClient {
     this.#publish()
     try {
       await this.flush()
-      if (this.#closed) throw new Error('编辑器已关闭，请重新打开草稿。')
-      if (this.#conflicts.size || this.#pending.size) throw new Error('先保存文本或处理版本冲突，再调整角色条目。')
+      if (this.#closed) throw new Error('编辑器已关闭，请重新打开稿纸。')
+      if (this.#conflicts.size || this.#pending.size) throw new Error('请等待保存完成或先处理冲突，再调整角色。')
       this.#saving = true
       this.#error = null
       this.#publish()

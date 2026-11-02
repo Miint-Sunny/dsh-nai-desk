@@ -14,11 +14,11 @@ export function DeskTurnCard({ turn, seq, openDesk }) {
   if (!writes?.length) return null
   const parts = [...new Set(writes.map(write => write.label))]
   return <div className="nd-turn-cards">
-    <button type="button" className="nd-turn-card" aria-label="在右侧打开提示词稿纸" onClick={openDesk}>
+    <button type="button" className="nd-turn-card" aria-label="在侧边栏打开稿纸" onClick={openDesk}>
       <span className="nd-turn-card-icon"><Glyph /></span>
       <span className="nd-turn-card-details">
-        <span className="nd-turn-card-title">提示词稿纸</span>
-        <span className="nd-turn-card-description">已写入 {parts.join('、')}</span>
+        <span className="nd-turn-card-title">稿纸</span>
+        <span className="nd-turn-card-description">已修改：{parts.join('、')}</span>
       </span>
       <span className="nd-turn-card-open">打开</span>
     </button>

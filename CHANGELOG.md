@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.0-preview.7 · 2026-11-03
+
+- Show masking with the eye itself: the toggle uses the host's credential reveal artwork, an open eye while the model can read the field or character and a closed eye while it cannot. The text tag is gone. The accessible name stays fixed with `aria-pressed`, and a masked Base/UC field also marks its tab.
+- Remove duplicated information: the 「角色 N」 section heading repeated the character cards' own names, and the history bar repeated the version number shown in the header. Space now separates the base card from the characters (24px between groups, 12px within).
+- Move up, move down and delete into a per-character 「⋯」 menu adapted from the host Menu. The header keeps masking, the enabled switch and folding, and stays on one line down to 320px. Deleting by keyboard moves focus to Undo.
+- Make the full-column tool follow the host's fullscreen button: its label and glyph change with the state instead of relying on a background color.
+- Rewrite the panel and chat-card copy to one vocabulary (稿纸, 主提示词, UC, 角色, 版本, 恢复此版本, 返回当前版本, 保存中…/已保存) and record it in docs/ui.md. Format history times with `Intl`, list every changed part, and show a masked span's original text in full.
+- History versions keep showing mask and enabled states read-only instead of swapping in text tags.
+
 ## 0.2.0-preview.6 · 2026-11-03
 
 - Open the draft from the conversation: the first model write in a session pushes the right sidebar open on the draft, as the host does for submitted plans; each Turn that wrote the draft ends with a plan-style card whose Open action reopens it.

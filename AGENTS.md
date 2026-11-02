@@ -3,7 +3,8 @@
 用中文沟通。此仓库同时提供 NAI5 提示词预设、隔离规则、原样 vendored 的 11 个技能，以及右侧可编辑稿纸。
 
 - GitHub 仓库名为 dsh-nai-desk。npm/安装标识暂保留 dsh-nai5-prompting，预设 ID 保留 nai5-prompting，兼容旧安装与旧会话。
-- 稿纸只做纯文字 Base/UC、角色正向/UC、名称、排序、启停、删除撤销、折叠与全栏编辑。没有骰子、剪贴板、自动填词、OC、块库、MCP 或 W.O.F 连接。
+- 稿纸只做纯文字主提示词/UC、角色提示词/UC、名称、排序、启停、删除撤销、折叠、全栏编辑、向模型屏蔽和版本历史。没有骰子、复制按钮、自动填词、OC、块库、MCP 或 W.O.F 连接。
+- 界面文字和版式交付前按 better-writing、better-layout、better-accessibility 自查；用词以 [docs/ui.md](docs/ui.md)「界面用词」为准，同一个东西只用一个名字，不写口语。
 - skills/ 与 vendor.json 必须保持对应上游版本的原始字节；不要在这里编辑技能正文，用 scripts/sync-skills.mjs 同步。
 - 后台、模型工具和面板使用同一份按会话隔离的数据，revision 冲突不得静默覆盖。
 - 本地接口只注册到 dsh 认证 Connection，不另开裸 HTTP 服务。

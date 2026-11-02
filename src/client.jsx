@@ -53,7 +53,7 @@ export function apply(ctx) {
       const eligible = list.getSnapshot().byId[id]?.projectionValues?.agentPreset === PRESET_ID
       if (eligible && !unregister) unregister = ctx.sidebarRightTabs.register({
         id: PANEL_ID, kind: PANEL_KIND, keepMounted: true, priority: 'extension', title: () => '稿纸',
-        guide: [{ id: 'open', order: 45, title: () => '提示词稿纸', description: () => '编辑当前会话的提示词草稿', icon: () => <Icon kind="notebook" /> }],
+        guide: [{ id: 'open', order: 45, title: () => '提示词稿纸', description: () => '编辑当前会话的主提示词、角色和 UC', icon: () => <Icon kind="notebook" /> }],
       })
       else if (!eligible && unregister) { unregister(); unregister = undefined }
     }

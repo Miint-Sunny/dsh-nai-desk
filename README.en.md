@@ -4,15 +4,15 @@
 
 NAI Desk is a prompt-authoring plugin for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness), targeting NovelAI Diffusion V5. It provides an NAI5 preset and a session draft editor. Model tools and the editor operate on the same draft; image generation remains on the NovelAI website.
 
-Current version: **0.2.0-preview.6** (prerelease).
+Current version: **0.2.0-preview.7** (prerelease).
 
 ## Features
 
 - Edit the Base Prompt and draft-level Undesired Content (UC).
 - Follow dsh's theme, fonts and default control patterns in light and dark mode; see [editor styling (Chinese)](docs/ui.md).
-- Manage character prompts: positive text, character-level UC, display names, order, enabled state, delete/undo, and folding.
-- Hide text from the model: mask a selected span, a whole field, or a whole character. The model sees only placeholders such as `⟪屏蔽N⟫`, knows something is there, and cannot read or overwrite it; manual copying yields the original text.
-- Draft history: each model write and manual edit becomes a step you can browse from the panel header and restore as the current draft.
+- Manage characters: prompt, character UC, name, enabled state, and folding. Move up, move down, and delete sit in the “⋯” menu of each character header; a deletion can be undone.
+- Hide text from the model: mask a selected span, or use the eye button in a card header to mask a whole field or character. A closed eye means the model cannot read it, and a masked field shows the same mark on its tab. The model sees only placeholders such as `⟪屏蔽N⟫`, knows something is there, and cannot read or overwrite it; manual copying yields the original text.
+- Version history: each model write and manual edit becomes a version you can browse from the panel header and restore with “恢复此版本” (Restore this version).
 - Submit manual edits automatically and receive committed updates when connected. Models update drafts through the `desk_*` tools. The first model write in a session pushes the right sidebar open on the draft; each later turn that wrote the draft ends with a card that reopens it.
 - Persist drafts by session and load them after restart. Existing chat history is not automatically converted into a draft.
 - Use the bundled nai5-prompting skills. The current snapshot is v1.2.8 with 11 skills; provenance and checksums are recorded in [VENDOR.md](VENDOR.md) and [vendor.json](vendor.json).
@@ -24,10 +24,10 @@ The plugin does not perform image generation or website form operations and incl
 Add an installation source in the DeepSeek Harness plugin manager, or use its CLI. Before running the CLI command below, fully quit the desktop app and TUI (⌘Q on macOS).
 
 ```sh
-dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.6
+dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.7
 ```
 
-A `.tgz` package is available on the [prerelease page](https://github.com/Miint-Sunny/dsh-nai-desk/releases/tag/v0.2.0-preview.6). Release packages contain compiled output and do not run this plugin's build during installation. Development installations can use `link:/absolute/path/to/checkout`; linked installs use working-tree files directly, so quit dsh before rebuilding or switching versions.
+A `.tgz` package is available on the [prerelease page](https://github.com/Miint-Sunny/dsh-nai-desk/releases/tag/v0.2.0-preview.7). Release packages contain compiled output and do not run this plugin's build during installation. Development installations can use `link:/absolute/path/to/checkout`; linked installs use working-tree files directly, so quit dsh before rebuilding or switching versions.
 
 ### Stable identifiers
 
@@ -45,7 +45,7 @@ If an upgrade from the old repository address fails an integrity check for the o
 
 ```sh
 dsh plugin --profile desktop remove dsh-nai5-prompting
-dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.6
+dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.7
 ```
 
 Do not replace integrity hashes to suppress an error. Stable `v0.1.6` remains available under the new repository address for rollback; it does not provide the draft editor.
