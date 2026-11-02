@@ -4,12 +4,13 @@ import { apply, inject, draftDomain } from '../src/host.js'
 import * as toolPlugin from '../src/tools-plugin.js'
 
 function context() {
-  const records = new Map(), routes = [], cleanups = [], definitions = []
+  const records = new Map(), history = new Map(), routes = [], cleanups = [], definitions = []
   let closed = 0, leases = 0
   const ctx = {
     storageDomain: { async open(spec) {
-      assert.equal(spec.name, 'nai_desk')
-      return { table: () => ({ get: id => records.get(id), put: async (id, value) => records.set(id, value) }), close: async () => { closed++ } }
+      assert.ok(['nai_desk', 'nai_desk_history'].includes(spec.name))
+      const store = spec.name === 'nai_desk' ? records : history
+      return { table: () => ({ get: id => store.get(id), put: async (id, value) => store.set(id, value) }), close: async () => { closed++ } }
     } },
     sessionQuery: { async observeSession(id) { return { projections: { values: { agentPreset: id === 'nai' ? 'nai5-prompting' : 'standard' } }, [Symbol.dispose]() { leases++ } } } },
     connection: { fetch: { register(route) { routes.push(route); return () => { routes.splice(routes.indexOf(route), 1) } } } },
@@ -42,7 +43,7 @@ test('host uses storageDomain and authenticated Connection, publishes one shared
   await env.dispose()
   assert.equal(env.ctx.naiDesk, undefined)
   assert.equal(env.routes.length, 0)
-  assert.equal(env.counts().closed, 1)
+  assert.equal(env.counts().closed, 2)
 })
 
 test('preset child registers tools only in its supplied context and cleans them up', async () => {
@@ -70,5 +71,5 @@ test('the draft service still starts when a non-web profile has no Connection', 
   assert.equal((await env.ctx.naiDesk.read('terminal')).revision, 0)
   assert.equal(env.routes.length, 0)
   await env.dispose()
-  assert.equal(env.counts().closed, 1)
+  assert.equal(env.counts().closed, 2)
 })

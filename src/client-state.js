@@ -44,6 +44,7 @@ export class DeskClient {
   #pending = new Map()
   #conflicts = new Map()
   #listeners = new Set()
+  #remoteListeners = new Set()
   #version = 0
   #loading = true
   #saving = false
@@ -68,6 +69,8 @@ export class DeskClient {
 
   getSnapshot = () => this.#state
   subscribe = listener => { this.#listeners.add(listener); return () => this.#listeners.delete(listener) }
+  /** Called with each newer draft that arrives through the live watch, not with the first load. */
+  onRemoteChange = listener => { this.#remoteListeners.add(listener); return () => this.#remoteListeners.delete(listener) }
 
   #publish() {
     if (this.#closed) return
@@ -229,6 +232,11 @@ export class DeskClient {
     } finally { this.#saving = false; this.#commanding = false; this.#publish() }
   }
 
+  /** History steps without bodies, oldest first; the last one matches the current draft. */
+  history() { return this.#send({ action: 'history' }) }
+
+  version(revision) { return this.#send({ action: 'version', revision }) }
+
   pause() { this.#watchWanted = false; this.#watchController?.abort(); this.#watchController = undefined }
 
   resume() {
@@ -240,9 +248,11 @@ export class DeskClient {
       let delay = 500
       while (!controller.signal.aborted && !this.#closed) {
         try {
-          const value = await this.#send({ action: 'watch', revision: this.#server.revision }, controller.signal)
+          const known = this.#server.revision
+          const value = await this.#send({ action: 'watch', revision: known }, controller.signal)
           if (controller.signal.aborted || this.#closed) return
           this.#adopt(value)
+          if (this.#server.revision > known) for (const listener of [...this.#remoteListeners]) listener(this.#server)
           this.#error = null
           this.#publish()
           delay = 500
@@ -265,5 +275,6 @@ export class DeskClient {
     this.pause()
     this.#controller.abort()
     this.#listeners.clear()
+    this.#remoteListeners.clear()
   }
 }

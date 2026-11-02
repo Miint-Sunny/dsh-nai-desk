@@ -18,9 +18,11 @@ test('built client offers the right tab only for the selected NAI5 session and r
   vm.runInNewContext(readFileSync(new URL('../lib/client.js', import.meta.url), 'utf8'), context)
   const current = observable({ key: 'one' })
   const list = observable({ byId: { one: { projectionValues: { agentPreset: 'standard' } } } })
-  const tabs = new Map(), cleanups = [], slots = []
+  const tabs = new Map(), cleanups = [], slots = [], definitions = []
   const ctx = {
     uiSession: { adapter: { current } }, sessions: { list },
+    sidebarRight: { openTab() {} },
+    uiConversation: { events: { register(definition) { definitions.push(definition); return () => {} } } },
     sidebarRightTabs: { register(def) { tabs.set(def.kind, def); return () => tabs.delete(def.kind) } },
     slots: { inject(_name, callback) { cleanups.push(callback()) }, register(meta, component) { slots.push({ meta, component }); return () => {} } },
     effect(factory) { const cleanup = factory(); cleanups.push(cleanup); return cleanup },
@@ -32,6 +34,8 @@ test('built client offers the right tab only for the selected NAI5 session and r
   assert.equal(tabs.get('nai-desk').guide.length, 1)
   const body = slots.find(s => s.meta.name === 'sidebar.right.pane.tab')
   assert.equal(body.meta.inject('one').sessionId, 'one')
+  assert.deepEqual(definitions.map(d => d.kind), ['nai-desk-writes'])
+  assert.equal(slots.find(s => s.meta.name === 'conversation.chat.turnTail').meta.id, 'nai-desk')
   const title = slots.find(s => s.meta.name === 'sidebar.right.pane.tab.title')
   assert.equal(title.meta.key, body.meta.key)
   assert.equal(title.meta.inject('one').sessionId, 'one')

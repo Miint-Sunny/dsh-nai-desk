@@ -1,6 +1,6 @@
 {
   "name": "dsh-nai5-prompting",
-  "version": "0.2.0-preview.5",
+  "version": "0.2.0-preview.6",
   "description": "DeepSeek Harness 的 NovelAI V5 提示词预设与会话草稿编辑器",
   "keywords": [
     "deepseek-harness",
@@ -87,6 +87,8 @@
         "@deepseek-ai/dsh-client-ui-renderer",
         "@deepseek-ai/dsh-client-ui-sidebar-right",
         "@deepseek-ai/dsh-client-ui-session",
+        "@deepseek-ai/dsh-client-ui-conversation",
+        "@deepseek-ai/dsh-client-ui-chat",
         "@deepseek-ai/dsh-api-session-controller"
       ]
     }

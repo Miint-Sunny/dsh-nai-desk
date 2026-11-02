@@ -1,9 +1,9 @@
 /* Layout follows the host's own sidebar pages; controls are adapted from
  * dsh-v0.2.1-rc.5 ui-primitives (MIT, see NOTICE).
  * - Panel frame: the Workspace files tab (38px header, hairline seam, 28px tools).
- * - Cards: the settings-card material (R20, 0.5px stroke, no shadow); elevation
- *   is reserved for floating surfaces and the composer.
- * - Add row: the Models page dashed "add" button.
+ * - Cards: the composer and in-chat card material — input-major fill, border 0,
+ *   and the elevation shadow whose first layer is the 0.5px translucent stroke.
+ * - Add row: the Models page dashed "add" button. Chat card: the plan card.
  * The host owns colors, fonts, radii and focus. No local palette.
  */
 .nai-desk {
@@ -22,6 +22,8 @@
   flex: none; display: flex; align-items: center; gap: 4px; height: 38px; padding: 0 6px 0 16px;
   border-bottom: .5px solid var(--dsw-alias-border-l3);
 }
+.nai-desk .nd-steps { display: flex; align-items: center; gap: 0; margin-right: 2px; }
+.nai-desk .nd-step-count { min-width: 40px; color: var(--dsw-alias-label-tertiary); font-size: 12px; line-height: 18px; text-align: center; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .nai-desk .nd-status { margin-right: auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--dsw-alias-label-tertiary); font-size: 12px; line-height: 18px; }
 .nai-desk .nd-status[data-tone="error"] { color: var(--dsw-alias-state-error-primary); }
 .nai-desk .nd-status[data-tone="warn"] { color: var(--dsw-alias-state-warn-label); }
@@ -33,22 +35,60 @@
 .nai-desk .nd-tool:disabled { opacity: .4; cursor: default; }
 
 .nai-desk .nd-body { flex: 1 1 auto; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 12px; padding: 12px 16px 16px; }
+.nai-desk .nd-body > .nd-base, .nai-desk .nd-body > .nd-characters { transition: opacity 120ms ease; }
+.nai-desk .nd-body[aria-busy="true"] > .nd-base, .nai-desk .nd-body[aria-busy="true"] > .nd-characters { opacity: .55; }
+.nai-desk .nd-history-bar {
+  position: sticky; top: -12px; z-index: 2; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  margin: -12px -16px 0; padding: 8px 12px 8px 16px; background: var(--dsw-alias-bg-base);
+  border-bottom: .5px solid var(--dsw-alias-border-l3); font-size: 12px; line-height: 18px; color: var(--dsw-alias-label-tertiary);
+}
+.nai-desk .nd-history-meta { display: flex; flex-wrap: wrap; gap: 0 8px; min-width: 0; }
+.nai-desk .nd-history-meta strong { color: var(--dsw-alias-label-primary); font-weight: 500; }
+.nai-desk .nd-history-actions { display: flex; gap: 6px; margin-left: auto; }
 
-/* Settings-card material: the host's independent content card. */
+/* Glass card: no border; the stroke is the first layer of the elevation shadow
+ * and is rebound per element, as on the composer and in-chat cards. */
 .nai-desk .nd-card {
   display: flex; flex-direction: column; gap: 10px; min-width: 0; padding: 12px;
-  border: .5px solid var(--dsw-alias-settings-card-stroke); border-radius: var(--dsw-radius-xl); background: var(--dsw-alias-settings-card-fill);
+  border: 0; border-radius: var(--dsw-radius-xl); background: var(--dsw-specific-input-major);
+  --dsw-elevation-stroke-color: var(--dsw-alias-border-l2); box-shadow: var(--dsw-elevation-panel);
+  --dsh-scrollbar-thumb: var(--dsw-alias-scrollbar-bg-l2); --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2);
+  transition: box-shadow 160ms var(--ds-ease-in-out);
 }
-.nai-desk .nd-card:has(.nd-editor:focus) { border-color: var(--dsw-alias-state-business-primary); }
+.nai-desk .nd-card:has(.nd-editor:focus) { --dsw-elevation-stroke-color: var(--dsw-alias-state-business-primary); }
 .nai-desk .nd-card-head { display: flex; align-items: center; gap: 6px; min-height: 28px; min-width: 0; }
+.nai-desk .nd-head-fill { flex: 1 1 auto; }
+.nai-desk .nd-tag {
+  flex: none; padding: 1px 6px; border: .5px solid var(--dsw-alias-border-l3); border-radius: var(--dsw-radius-xs);
+  color: var(--dsw-alias-label-secondary); font-size: 11px; line-height: 16px; white-space: nowrap;
+}
 .nai-desk .nd-card-body { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+/* The textarea and the layer behind it share every box and text metric so placeholder chips line up. */
+.nai-desk .nd-editor-wrap { position: relative; min-width: 0; }
 .nai-desk .nd-editor {
   display: block; width: 100%; min-width: 0; margin: 0; padding: 0 2px; border: 0; outline: none; resize: none;
   background: transparent; color: var(--dsw-alias-label-primary);
-  font-size: var(--dsh-content-font-size, 14px); line-height: 1.6;
+  font-family: var(--dsw-font-family); font-size: var(--dsh-content-font-size, 14px); line-height: 1.6; letter-spacing: normal;
+  white-space: pre-wrap; overflow-wrap: break-word; scrollbar-gutter: stable;
   field-sizing: content; min-height: 3lh; max-height: 18lh; overflow-y: auto;
 }
+.nai-desk textarea.nd-editor { position: relative; z-index: 1; }
+.nai-desk .nd-editor-layer { position: absolute; inset: 0; z-index: 0; overflow: hidden; color: transparent; pointer-events: none; field-sizing: fixed; min-height: 0; max-height: none; }
+.nai-desk .nd-editor-layer .nd-token { color: transparent; }
+.nai-desk .nd-token {
+  border-radius: var(--dsw-radius-xs); background: var(--dsw-alias-interactive-bg-active);
+  box-shadow: 0 0 0 .5px var(--dsw-alias-border-l3); color: inherit;
+}
 .nai-desk .nd-base .nd-editor { min-height: 5lh; }
+.nai-desk .nd-editor[readonly] { cursor: default; }
+.nai-desk .nd-hint {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0;
+  padding: 6px 0 0; border-top: .5px solid var(--dsw-alias-border-l2); font-size: 12px; line-height: 18px; color: var(--dsw-alias-label-tertiary);
+}
+.nai-desk .nd-hint-text { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.nai-desk .nd-hint-text .nd-token { flex: none; padding: 0 4px; color: var(--dsw-alias-label-secondary); }
+.nai-desk .nd-hint-secret { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--dsw-alias-label-secondary); }
+.nai-desk .nd-hint .nd-button { gap: 4px; }
 .nai-desk .nd-editor::placeholder { color: var(--dsw-alias-label-caption); opacity: 1; }
 
 /* SegmentedControl: one indicator, equal tracks and roving keyboard focus. */
@@ -84,7 +124,7 @@
   text-overflow: ellipsis;
 }
 .nai-desk .nd-name::placeholder { color: var(--dsw-alias-label-caption); opacity: 1; }
-.nai-desk .nd-name:focus { border-color: var(--dsw-alias-state-business-primary); }
+.nai-desk .nd-name:not([readonly]):focus { border-color: var(--dsw-alias-state-business-primary); }
 .nai-desk .nd-actions { display: flex; align-items: center; gap: 2px; flex: none; }
 .nai-desk .nd-actions .nd-switch { margin-right: 6px; }
 .nai-desk .nd-disabled .nd-name, .nai-desk .nd-disabled .nd-gender { color: var(--dsw-alias-label-tertiary); }
@@ -120,6 +160,7 @@
 .nai-desk .nd-button-md { height: 36px; font-size: 14px; line-height: 20px; }
 .nai-desk .nd-button-sm { height: 28px; padding: 0 10px; border-radius: var(--dsw-radius-sm); font-size: 12px; line-height: 18px; }
 .nai-desk .nd-button-outline { border: .5px solid var(--dsw-alias-border-l3); }
+.nai-desk .nd-button-primary { background: var(--dsw-alias-button-primary-fill); color: var(--dsw-alias-label-primary-foreground); }
 .nai-desk .nd-button:disabled { opacity: .4; cursor: default; }
 .nai-desk .nd-button:active:not(:disabled) { background: var(--dsw-alias-interactive-bg-active); }
 
@@ -159,10 +200,12 @@
 @media (hover: hover) {
   .nai-desk .nd-tool:hover:not(:disabled) { color: var(--dsw-alias-label-primary); background: var(--dsw-alias-interactive-bg-hover); }
   .nai-desk .nd-tool-danger:hover:not(:disabled) { color: var(--dsw-alias-state-error-primary); background: var(--dsw-alias-interactive-bg-hover-danger); }
-  .nai-desk .nd-button:hover:not(:disabled), .nai-desk .nd-creator:hover:not(:disabled), .nai-desk .nd-name:hover:not(:focus) { background: var(--dsw-alias-interactive-bg-hover); }
+  .nai-desk .nd-button:hover:not(:disabled), .nai-desk .nd-creator:hover:not(:disabled), .nai-desk .nd-name:not([readonly]):hover:not(:focus) { background: var(--dsw-alias-interactive-bg-hover); }
+  .nai-desk .nd-button-primary:hover:not(:disabled) { background: var(--dsw-alias-button-primary-hover); }
   .nai-desk .nd-tab:hover { color: var(--dsw-alias-label-primary); }
 }
 @container (max-width: 370px) {
+  .nai-desk .nd-card-head .nd-tag { display: none; }
   .nai-desk .nd-body { padding-inline: 12px; }
   .nai-desk .nd-character .nd-card-head { flex-wrap: wrap; }
   .nai-desk .nd-name { flex-basis: calc(100% - 26px); }
@@ -177,3 +220,28 @@
   .nai-desk .nd-editor, .nai-desk .nd-name { font-size: max(16px, var(--dsh-content-font-size, 14px)); }
 }
 @media (prefers-reduced-motion: reduce) { .nai-desk .nd-tab-indicator, .nai-desk .nd-switch-thumb { transition: none; } }
+
+/* In-chat card under a Turn that wrote the draft: the plan card treatment. */
+.nd-turn-cards { display: flex; flex-direction: column; gap: 10px; }
+.nd-turn-card {
+  --nd-turn-card-fill: var(--dsw-static-neutral-50); --nd-turn-card-hover: var(--dsw-static-neutral-100);
+  box-sizing: border-box; display: flex; align-items: center; gap: 10px; width: 100%; min-width: 0; height: 60px; margin: 0; padding: 8px 10px;
+  border: .5px solid var(--dsw-alias-border-l1); border-radius: var(--dsw-radius-lg); background: var(--nd-turn-card-fill);
+  color: var(--dsw-alias-label-primary); font: inherit; text-align: left; cursor: pointer; transition: background-color 120ms ease;
+}
+body[data-ds-dark-theme] .nd-turn-card { --nd-turn-card-fill: var(--dsw-static-neutral-850); --nd-turn-card-hover: var(--dsw-static-neutral-800); }
+.nd-turn-card:hover { background: var(--nd-turn-card-hover); }
+.nd-turn-card:focus-visible { outline: var(--dsw-focus-ring-width) solid var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary)); outline-offset: 3px; }
+.nd-turn-card-icon {
+  box-sizing: border-box; flex: none; display: grid; place-items: center; width: 40px; height: 40px; border: .5px solid var(--dsw-alias-border-l1);
+  border-radius: 10px; background: color-mix(in srgb, var(--dsw-static-neutral-00) 50%, transparent); color: var(--dsw-alias-label-secondary);
+}
+body[data-ds-dark-theme] .nd-turn-card-icon { background: color-mix(in srgb, var(--dsw-static-neutral-00) 5%, transparent); }
+.nd-turn-card-details { display: flex; flex: 1; flex-direction: column; gap: 2px; min-width: 0; }
+.nd-turn-card-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 500; line-height: 20px; }
+.nd-turn-card-description { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--dsw-alias-label-tertiary); font-size: 10px; line-height: 16px; }
+.nd-turn-card-open {
+  box-sizing: border-box; display: inline-flex; flex: none; align-items: center; height: 28px; padding: 4px 8px;
+  border: .5px solid var(--dsw-alias-border-l3); border-radius: var(--dsw-radius-sm); background: var(--dsw-alias-button-floating-fill); font-size: 12px; line-height: 18px;
+}
+@media (prefers-reduced-motion: reduce) { .nd-turn-card, .nai-desk .nd-card, .nai-desk .nd-body > * { transition: none; } }

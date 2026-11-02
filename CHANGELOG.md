@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.0-preview.6 · 2026-11-03
+
+- Open the draft from the conversation: the first model write in a session pushes the right sidebar open on the draft, as the host does for submitted plans; each Turn that wrote the draft ends with a plan-style card whose Open action reopens it.
+- Hide text from the model. Mask a selected span, a whole Base/UC field, or a whole character. Model tools see placeholders such as `⟪屏蔽1⟫` and reject writes that drop or invent placeholders or touch masked fields; the editor paints placeholders as chips, deletes them whole, and copies the original text.
+- Add draft history: model writes and manual edits are recorded as steps (merged when close together, up to 60), browsable from the panel header in a read-only view and restorable as a new step. History is stored in its own `nai_desk_history` domain.
+- Give the base and character cards the composer's glass material: no border, input-major fill, and the elevation shadow whose first layer is the 0.5px translucent stroke; the focused card's stroke takes the accent color.
+- Record whether the latest revision came from the editor or the model. Existing drafts load unchanged.
+- Add the placeholder rule to the NAI5 preset instructions and draft tool descriptions.
+
 ## 0.2.0-preview.5 · 2026-11-02
 
 - Follow the host's own sidebar page layout, not only its colors: a 38px header with the save status and the full-column tool, aligned with the conversation header seam, as on the Workspace files tab.

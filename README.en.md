@@ -4,14 +4,16 @@
 
 NAI Desk is a prompt-authoring plugin for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness), targeting NovelAI Diffusion V5. It provides an NAI5 preset and a session draft editor. Model tools and the editor operate on the same draft; image generation remains on the NovelAI website.
 
-Current version: **0.2.0-preview.5** (prerelease).
+Current version: **0.2.0-preview.6** (prerelease).
 
 ## Features
 
 - Edit the Base Prompt and draft-level Undesired Content (UC).
 - Follow dsh's theme, fonts and default control patterns in light and dark mode; see [editor styling (Chinese)](docs/ui.md).
 - Manage character prompts: positive text, character-level UC, display names, order, enabled state, delete/undo, and folding.
-- Submit manual edits automatically and receive committed updates when connected. Models update drafts through the `desk_*` tools.
+- Hide text from the model: mask a selected span, a whole field, or a whole character. The model sees only placeholders such as `⟪屏蔽N⟫`, knows something is there, and cannot read or overwrite it; manual copying yields the original text.
+- Draft history: each model write and manual edit becomes a step you can browse from the panel header and restore as the current draft.
+- Submit manual edits automatically and receive committed updates when connected. Models update drafts through the `desk_*` tools. The first model write in a session pushes the right sidebar open on the draft; each later turn that wrote the draft ends with a card that reopens it.
 - Persist drafts by session and load them after restart. Existing chat history is not automatically converted into a draft.
 - Use the bundled nai5-prompting skills. The current snapshot is v1.2.8 with 11 skills; provenance and checksums are recorded in [VENDOR.md](VENDOR.md) and [vendor.json](vendor.json).
 
@@ -22,10 +24,10 @@ The plugin does not perform image generation or website form operations and incl
 Add an installation source in the DeepSeek Harness plugin manager, or use its CLI. Before running the CLI command below, fully quit the desktop app and TUI (⌘Q on macOS).
 
 ```sh
-dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.5
+dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.6
 ```
 
-A `.tgz` package is available on the [prerelease page](https://github.com/Miint-Sunny/dsh-nai-desk/releases/tag/v0.2.0-preview.5). Release packages contain compiled output and do not run this plugin's build during installation. Development installations can use `link:/absolute/path/to/checkout`; linked installs use working-tree files directly, so quit dsh before rebuilding or switching versions.
+A `.tgz` package is available on the [prerelease page](https://github.com/Miint-Sunny/dsh-nai-desk/releases/tag/v0.2.0-preview.6). Release packages contain compiled output and do not run this plugin's build during installation. Development installations can use `link:/absolute/path/to/checkout`; linked installs use working-tree files directly, so quit dsh before rebuilding or switching versions.
 
 ### Stable identifiers
 
@@ -43,7 +45,7 @@ If an upgrade from the old repository address fails an integrity check for the o
 
 ```sh
 dsh plugin --profile desktop remove dsh-nai5-prompting
-dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.5
+dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.6
 ```
 
 Do not replace integrity hashes to suppress an error. Stable `v0.1.6` remains available under the new repository address for rollback; it does not provide the draft editor.
@@ -52,7 +54,7 @@ Do not replace integrity hashes to suppress an error. Stable `v0.1.6` remains av
 
 1. Select a prompt-authoring workspace. Optional long-term preferences belong in `NAI.md`; see the [example](examples/studio/NAI.md).
 2. Start or continue an **NAI5 提示词** session.
-3. Open the right sidebar and select **提示词稿纸**.
+3. The draft opens on the first model write. You can also use the **提示词稿纸** card under a reply, or choose **提示词稿纸** from the right sidebar's **+** menu.
 4. Describe the request or identify fields to change. Edit the resulting draft and manually copy text into NovelAI.
 
 Request planning only when that is the intended output. Ask for the complete text in chat when needed. Image-input availability depends on the selected model.
@@ -63,12 +65,12 @@ The editor saves drafts automatically; file tools write workspace files when req
 
 - Within one host instance, writes are serialized per session and checked against `revision`. The client replays an update only when its target field has not changed remotely. Same-field conflicts require a version choice.
 - A write is acknowledged after host storage reports success. Uncommitted edits exist in client memory and are not guaranteed to survive refresh or forced termination.
-- There is no cross-process lock or notification mechanism, draft revision history, or automatic draft inheritance when a session is forked. Multiple host processes must not write the same draft storage concurrently.
+- There is no cross-process lock or notification mechanism, or automatic draft inheritance when a session is forked. Draft history keeps up to 60 steps. Multiple host processes must not write the same draft storage concurrently.
 - Preset isolation controls tool and skill visibility; it is not a process or permission sandbox. dsh remains responsible for file access, tool authorization, and network policy.
 
 See the [API reference (Chinese)](docs/api.md) for data structures, length units, error responses, and retry rules.
 
-Draft tools return the complete draft to the model, including text from disabled characters. Manual editing and autosave do not initiate model requests.
+Draft tools return the model's view of the draft: masked content appears only as placeholders; other text, including disabled characters, is returned as stored. Manual editing and autosave do not initiate model requests.
 
 ## Preset configuration
 
@@ -92,7 +94,7 @@ Project instructions use `NAI.md`. Host-level instructions and permissions still
 | Draft HTTP API | `/api/nai-desk/v1` |
 | Stored draft schema | `schemaVersion: 1` |
 
-An engine range is not a claim that every matching release was tested. Automated tests, isolated-host checks, and model-quality evaluation provide different evidence. See the [verification record](docs/verification-0.2.0-preview.5.md) and [changelog](CHANGELOG.md).
+An engine range is not a claim that every matching release was tested. Automated tests, isolated-host checks, and model-quality evaluation provide different evidence. See the [verification record](docs/verification-0.2.0-preview.6.md) and [changelog](CHANGELOG.md).
 
 ## Development
 

@@ -2,7 +2,7 @@ import { DeskError, LIMITS, sessionKey } from './desk.js'
 import { API_PATH } from './protocol.js'
 
 export { API_PATH }
-const statusCodes = { invalid_input: 400, wrong_preset: 403, not_found: 404, conflict: 409, limit_exceeded: 413, invalid_record: 500, closed: 503 }
+const statusCodes = { invalid_input: 400, wrong_preset: 403, masked: 403, not_found: 404, conflict: 409, limit_exceeded: 413, invalid_record: 500, closed: 503 }
 const reply = (value, status = 200) => new Response(JSON.stringify(value), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' } })
 const errorReply = (code, message, status, current) => reply({ error: { code, message, ...(current ? { current } : {}) } }, status)
 
@@ -50,6 +50,8 @@ export function createDeskHandler({ store, isNaiSession }) {
         read: ['action', 'sessionId'],
         mutate: ['action', 'sessionId', 'expectedRevision', 'operation'],
         watch: ['action', 'sessionId', 'revision'],
+        history: ['action', 'sessionId'],
+        version: ['action', 'sessionId', 'revision'],
       }
       const keys = Object.hasOwn(requestKeys, data.action) ? requestKeys[data.action] : undefined
       if (!keys || Object.keys(data).some(key => !keys.includes(key))) throw new DeskError('invalid_input', 'action 或请求字段不符合接口约定，请检查请求结构。')
@@ -60,6 +62,8 @@ export function createDeskHandler({ store, isNaiSession }) {
         case 'read': return reply(await store.read(id))
         case 'mutate': return reply(await store.mutate(id, data.expectedRevision, data.operation))
         case 'watch': return reply(await store.watch(id, data.revision, { signal: request.signal }))
+        case 'history': return reply(await store.history(id))
+        case 'version': return reply(await store.version(id, data.revision))
       }
     } catch (error) {
       if (request.signal.aborted || error?.name === 'AbortError') return errorReply('cancelled', '请求已取消', 499)
