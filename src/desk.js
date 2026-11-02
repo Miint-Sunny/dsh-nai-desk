@@ -21,24 +21,24 @@ function object(value, allowed, label) {
 }
 
 export function sessionKey(value) {
-  if (typeof value !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(value)) invalid('sessionId 无效')
+  if (typeof value !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(value)) invalid('标识格式无效：使用 1–128 位 ASCII 字母、数字、下划线或连字符。')
   return value
 }
 
 function text(value, label, max = LIMITS.fieldCharacters) {
-  if (typeof value !== 'string') invalid(`${label} 必须是文字`)
-  if (value.length > max) throw new DeskError('limit_exceeded', `${label} 超过 ${max} 字符的上限`)
+  if (typeof value !== 'string') invalid(`${label} 必须是字符串。`)
+  if (value.length > max) throw new DeskError('limit_exceeded', `${label} 超过长度上限 ${max}，请缩短后提交。`)
   return value
 }
 
 function integer(value, min, max, label) {
-  if (!Number.isSafeInteger(value) || value < min || value > max) invalid(`${label} 超出范围`)
+  if (!Number.isSafeInteger(value) || value < min || value > max) invalid(`${label} 必须是 ${min} 到 ${max} 之间的安全整数。`)
   return value
 }
 
 function position(value) {
   object(value, ['x', 'y'], 'position')
-  for (const key of ['x', 'y']) if (typeof value[key] !== 'number' || !Number.isFinite(value[key]) || value[key] < 0 || value[key] > 1) invalid('角色位置必须在 0 到 1 之间')
+  for (const key of ['x', 'y']) if (typeof value[key] !== 'number' || !Number.isFinite(value[key]) || value[key] < 0 || value[key] > 1) invalid('position.x 和 position.y 必须是 0 到 1 之间的有限数值。')
   return { x: value.x, y: value.y }
 }
 
@@ -59,7 +59,7 @@ function character(value, number, idFactory) {
 }
 
 function withinSize(state) {
-  if (Buffer.byteLength(JSON.stringify(state)) > LIMITS.recordBytes) throw new DeskError('limit_exceeded', '稿纸总大小超过 1 MiB 上限')
+  if (Buffer.byteLength(JSON.stringify(state)) > LIMITS.recordBytes) throw new DeskError('limit_exceeded', '草稿序列化大小超过 1 MiB，请减少内容后提交。')
   return state
 }
 
@@ -67,9 +67,9 @@ function withinSize(state) {
 export function validateRecord(value, id) {
   try {
     object(value, ['schemaVersion', 'sessionId', 'revision', 'main', 'uc', 'characters'], 'record')
-    if (value.schemaVersion !== 1 || value.sessionId !== id) invalid('稿纸版本或会话不匹配')
+    if (value.schemaVersion !== 1 || value.sessionId !== id) invalid('草稿格式版本或会话标识不匹配。')
     integer(value.revision, 0, Number.MAX_SAFE_INTEGER, 'revision')
-    text(value.main, '主串')
+    text(value.main, '主提示词')
     text(value.uc, '总 UC')
     if (!Array.isArray(value.characters) || value.characters.length > LIMITS.characters) invalid('角色列表无效')
     const ids = new Set()
@@ -81,7 +81,7 @@ export function validateRecord(value, id) {
     }
     return structuredClone(withinSize(value))
   } catch (error) {
-    throw new DeskError('invalid_record', `已保存稿纸无效，原数据已保留：${error.message}`)
+    throw new DeskError('invalid_record', `草稿数据不符合当前格式，无法加载：${error.message}`)
   }
 }
 
@@ -93,7 +93,7 @@ function applyOperation(state, operation, idFactory) {
   const find = id => {
     sessionKey(id)
     const index = next.characters.findIndex(c => c.id === id)
-    if (index < 0) throw new DeskError('not_found', '这个角色栏已不存在，请重新读取稿纸')
+    if (index < 0) throw new DeskError('not_found', '角色提示词条目不存在，请重新读取草稿后操作。')
     return index
   }
   switch (operation.type) {
@@ -105,7 +105,7 @@ function applyOperation(state, operation, idFactory) {
     }
     case 'add_character': {
       object(operation, ['type', 'character', 'index'], 'operation')
-      if (next.characters.length >= LIMITS.characters) throw new DeskError('limit_exceeded', `最多 ${LIMITS.characters} 个角色栏`)
+      if (next.characters.length >= LIMITS.characters) throw new DeskError('limit_exceeded', `草稿最多包含 ${LIMITS.characters} 条角色提示词。`)
       const index = operation.index === undefined ? next.characters.length : integer(operation.index, 0, next.characters.length, 'index')
       const added = character(operation.character ?? {}, index + 1, idFactory)
       if (next.characters.some(c => c.id === added.id)) invalid('角色 id 已存在')
@@ -140,7 +140,7 @@ function applyOperation(state, operation, idFactory) {
       next.characters.splice(to, 0, moving)
       break
     }
-    default: invalid('不支持的稿纸操作')
+    default: invalid('不支持该草稿操作。')
   }
   next.revision = integer(state.revision + 1, 1, Number.MAX_SAFE_INTEGER, 'revision')
   return withinSize(next)
@@ -164,7 +164,7 @@ export class DeskStore {
   }
 
   #assertOpen() {
-    if (this.#closed) throw new DeskError('closed', '稿纸服务已关闭')
+    if (this.#closed) throw new DeskError('closed', '草稿服务已关闭，请重新连接后重试。')
   }
 
   async #load(id) {
@@ -190,7 +190,7 @@ export class DeskStore {
     const current = previous.catch(() => {}).then(async () => {
       this.#assertOpen()
       const before = await this.#load(id)
-      if (before.revision !== expectedRevision) throw new DeskError('conflict', '稿纸已被另一端修改，请读取最新版本再写入', before)
+      if (before.revision !== expectedRevision) throw new DeskError('conflict', '草稿版本已变化，请重新读取后提交。', before)
       const next = applyOperation(before, op, this.#idFactory)
       await this.#persistence.write(id, structuredClone(next))
       this.#loaded.set(id, Promise.resolve(next))
@@ -237,7 +237,7 @@ export class DeskStore {
 
   async close() {
     this.#closed = true
-    for (const listeners of this.#listeners.values()) for (const listener of [...listeners]) listener(new DeskError('closed', '稿纸服务已关闭'))
+    for (const listeners of this.#listeners.values()) for (const listener of [...listeners]) listener(new DeskError('closed', '草稿服务已关闭，请重新连接后重试。'))
     this.#listeners.clear()
     await Promise.allSettled([...this.#tails.values()])
     this.#loaded.clear()

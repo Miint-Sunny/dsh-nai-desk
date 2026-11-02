@@ -1,6 +1,6 @@
 {
   "meta": {
     "title": "NAI Desk",
-    "description": "NAI5 prompting preset, 11 writing skills, and a per-session editable prompt sidebar, isolated from other modes."
+    "description": "A NovelAI V5 prompting preset and per-session draft editor with bundled skills and model read/write tools."
   }
 }

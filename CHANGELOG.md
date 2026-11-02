@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.0-preview.2 · 2026-11-02
+
+### Changed
+
+- Separate the user guide, API contract, architecture notes and verification records.
+- Define preset visibility controls separately from host permissions and process isolation.
+- Document the single-host scope of revision checks, uncommitted edit lifetime, storage limits and error handling.
+- Standardize plugin and tool descriptions around drafts, fields, revisions and observable effects.
+- Correct editor status labels so connection errors are not presented as proof of unsaved data; use a fixed ON-state label for the character toggle.
+- Preserve API paths, request fields, error codes, stored schema and vendored skills. No data migration is required.
+
 ## 0.2.0-preview.1 · 2026-11-02
 
 - Rename the repository to dsh-nai-desk and the plugin display name to NAI Desk.

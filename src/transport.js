@@ -9,9 +9,9 @@ export async function requestDraft(data, signal) {
     method: 'POST', credentials: 'same-origin', headers: { 'content-type': 'application/json' }, body: JSON.stringify(data), signal,
   }))
   let body
-  try { body = await response.json() } catch { throw new Error(`暂时无法读取稿纸（HTTP ${response.status}），请重新连接 dsh`) }
+  try { body = await response.json() } catch { throw new Error(`无法解析草稿服务的响应（HTTP ${response.status}）。保留未保存内容后重试。`) }
   if (!response.ok) {
-    const error = new Error(typeof body.error?.message === 'string' ? body.error.message : '稿纸请求失败')
+    const error = new Error(typeof body.error?.message === 'string' ? body.error.message : '草稿请求失败，请保留未保存内容后重试。')
     error.code = body.error?.code
     if (body.error?.current) error.current = body.error.current
     throw error

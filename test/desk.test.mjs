@@ -119,7 +119,7 @@ test('character limit and duplicate id are rejected atomically', async () => {
   await assert.rejects(store.mutate('two', other.revision, { type: 'add_character', character: { prompt: 'y', id: 'same-id' } }), { code: 'invalid_input' })
 })
 
-test('malformed persisted state is reported, never silently reset', async () => {
+test('incompatible persisted records are rejected without writing a replacement', async () => {
   const { store, records } = setup()
   records.set('one', { schemaVersion: 99, main: 'unrecognized saved work' })
   await assert.rejects(store.read('one'), { code: 'invalid_record' })

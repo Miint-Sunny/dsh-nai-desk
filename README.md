@@ -2,139 +2,109 @@
 
 中文 | [English](README.en.md)
 
-给 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（dsh）加一个「NAI5 提示词」预设：用 [nai5-prompting](https://github.com/Miint-Sunny/nai5-prompting) 的 11 个拆分技能构思、设计和写 NovelAI V5 提示词。这个预设只交文本，不调用生图接口；它和 dsh 的其他预设互不干涉。
+NAI Desk 是 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的提示词编写插件，面向 NovelAI Diffusion V5。插件提供「NAI5 提示词」预设和会话草稿编辑器；模型工具与编辑器操作同一份草稿。图像生成仍在 NovelAI 网站完成。
 
-## 0.2.0 Preview：预设与稿纸合为一个插件
+当前版本：**0.2.0-preview.2**（预发布）。
 
-当前版本 **0.2.0-preview.1**。仓库从 `dsh-nai5-prompting` 改名为 `dsh-nai-desk`，插件显示名为 **NAI Desk**。安装标识仍为 `dsh-nai5-prompting`，预设 ID 仍为 `nai5-prompting`，沿用旧安装、旧会话、原有历史和稳定标签。
+## 功能
 
-- 右侧稿纸支持 **Base Prompt / UC** 和全栏编辑。
-- 角色栏支持 **Prompt / UC**、名称、上下排序、启用/停用、删除撤销、收起/展开。
-- 每个会话独立保存；模型通过 `desk_*` 写入，手动编辑自动保存，模型再读取时能看到。冲突保留本地文字，不静默覆盖另一端的新修改。
-- 安装后在 NAI5 会话打开右栏，选择 **提示词稿纸**。你自行选字复制到官网。
+- 编辑主提示词（Base Prompt）和草稿级负面提示词（UC）。
+- 管理角色提示词：正向文本、角色级 UC、显示名称、顺序、启用状态、删除撤销和折叠。
+- 模型通过 `desk_*` 工具更新草稿；编辑器自动提交手动修改，并在连接可用时接收已提交的更新。
+- 草稿按会话保存，重启后从宿主存储恢复。旧会话不会自动从历史回复提取草稿。
+- 使用内置的 nai5-prompting 技能指导提示词编写。当前快照为 v1.2.8，包含 11 个技能；来源和校验值见 [VENDOR.md](VENDOR.md) 与 [vendor.json](vendor.json)。
 
-默认安装自动包含预设和稿纸，不需要另装第二个插件。若 profile 自定义覆盖了整个 `preset-nai5-prompting` 行，请对照 [cordis.patch.yml](cordis.patch.yml) 加入稿纸工具行和交付说明。第一版没有骰子、复制按钮、剪贴板脚本、官网填词、OC 查询、块库、MCP 或 W.O.F 连接。
+本插件不执行图像生成或网站表单操作，也不包含外部连接器。界面保留原生文本选择，供手动复制。
 
-结构化接口见 [src/api.d.ts](src/api.d.ts)：`POST /api/nai-desk/v1` 支持 read/mutate/watch，使用宿主 Connection 鉴权，只接受 NAI5 会话。正文按会话存入 `nai_desk` 领域，不写自定义会话事件。每字段 32,768 字符、每稿 1 MiB、最多 22 个角色。会话分叉暂不复制原稿纸，强制关闭前请确认“已保存”。
+## 安装与升级
 
-变更见 [CHANGELOG.md](CHANGELOG.md)，验收见 [验证记录](docs/verification-0.2.0-preview.1.md)。这是预发布版；稳定版 v0.1.6 与旧版本标签保留。
+可在 DeepSeek Harness 的插件管理器中添加安装源，也可使用配套的 `dsh` CLI。使用以下 CLI 命令前，请完全退出桌面端及 TUI；macOS 使用 **⌘Q**。
 
-## 装上之后有什么
+```sh
+dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.2
+```
 
-新建会话时，在预设菜单（默认显示「Standard mode」的那个按钮）里选「NAI5 提示词」。这个预设里：
+也可安装 [预发布页](https://github.com/Miint-Sunny/dsh-nai-desk/releases/tag/v0.2.0-preview.2) 的 `.tgz` 文件。发布包包含编译产物，安装过程不执行本插件的构建脚本。开发环境可使用 `link:/absolute/path/to/checkout`；链接安装会直接使用该工作区的文件，切换版本或构建前应退出 dsh。
 
-- **系统提示词**整份换成写提示词的说明，写代码那套说明不会出现。说明里交代了这个环境的实际情况（写入 dsh 稿纸、没有生图和官网自动填词、预设开关按「关闭写足」），方法本身全部交给技能。
-- **技能**只有 nai5-prompting v1.2.8 的 11 个拆分技能，原样拷贝，没有改动（见 [VENDOR.md](VENDOR.md)）。
-- **工具**只有这些：载入技能、读写工作区文件、看图、向你提问、联网搜索和抓取网页（核对 tag 和角色名）、稿纸读写。没有终端、子代理、计划模式、任务清单和 MCP。dsh 0.2.2 起，当前模型线路拿不到搜索服务的凭据时，那一步不提供联网搜索。
-- **长对话**：上下文快满时自动压缩，也可以手动输入 `/compact`。
+### 标识符兼容
 
-## 互不干涉
-
-| | 「NAI5 提示词」预设 | 其他预设（Standard、Creator 等） |
+| 标识 | 值 | 用途 |
 |---|---|---|
-| 系统提示词 | 只有本插件的说明 | 不变 |
-| 技能 | 只有 11 个 nai5 技能；`~/.dsh/skills`、`~/.agents/skills`、项目里的技能和全局技能（例如桌面端自带的 Office 技能）都不出现 | 不变，看不到 nai5 技能 |
-| 工具 | 只有本预设挂载的工具；MCP、宿主插件和其他全局工具都隐藏 | 不变 |
-| 工作区说明文件 | 只读工作区里的 `NAI.md`，不读 `AGENTS.md`、`CLAUDE.md` | 不变，不读 `NAI.md` |
+| 仓库与产品名 | `dsh-nai-desk` / NAI Desk | 项目地址与界面展示 |
+| 包与安装标识 | `dsh-nai5-prompting` | 延续已有依赖和 profile 配置 |
+| 预设 ID | `nai5-prompting` | 延续已有会话的预设关联 |
 
-隔离只作用在这个预设的会话里，包括先开空会话再切换到这个预设的情况。稿纸接口使用 dsh 已认证的 Connection，不另开裸端口，不写自定义会话事件，也不改默认预设。
+这是一份插件包，不需要同时安装独立的面板包。保留安装标识的原因与入口兼容方式见 [架构说明](docs/architecture.md)。
 
-例外：`~/.dsh/AGENTS.md` 和 `~/.agents/AGENTS.md` 这两个全局说明文件由 dsh 固定读取，没法按预设关掉。写代码的规则不要放在这两个文件里，放进各个代码仓库自己的 `AGENTS.md`。
+如果 profile 覆盖了整个 `preset-nai5-prompting` 配置行，宿主会优先采用该覆盖。升级时需对照 [默认配置](cordis.patch.yml) 合并草稿工具和环境说明，不能假定上游配置会自动合入自定义行。
 
-## 安装
+从旧仓库地址升级时，如果包管理器报告旧 GitHub 归档的完整性校验失败，可在备份 profile 配置后移除旧依赖，再从新仓库安装：
 
-需要 dsh **0.2.1-rc.5 及以上、0.3.0 以下**（`package.json` 的 `engines.dsh`）。0.2.0 preview 在 rc.5 验证，其它版本须核对插件接口；下方旧版本实测记录保留其原范围。插件是纯 JavaScript，安装时不需要构建，也不需要打开 `allowBuilds`。
-
-**桌面端**：点侧栏的「插件」（不是「设置」），再点页面右上角的「＋ 添加插件」（它旁边的下拉箭头里也有同一个入口「安装第三方插件」），在输入框里填 `github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.1`，然后点「安装」。想防止标签被改动，就把 `v0.2.0-preview.1` 换成 [Release 页](https://github.com/Miint-Sunny/dsh-nai-desk/releases)上写的那个提交号。输入框里也可以填本机仓库的目录路径。
-
-也可以用命令行：先 **⌘Q 完全退出桌面端**，再用桌面端自带的 dsh 安装：
-
-```bash
-"/Applications/DeepSeek Harness.app/Contents/Resources/runtime/cli/bin/dsh" plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.1
+```sh
+dsh plugin --profile desktop remove dsh-nai5-prompting
+dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.2
 ```
 
-Release 页上附了打好的 `dsh-nai-desk-0.2.0-preview.1.tgz`，下载后把上面的 `github:…` 换成这个文件的路径也能装，不用联网拉仓库。
-
-**其他 profile**（例如 `dsh web`）：
-
-```bash
-dsh plugin --profile web add github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.1
-```
-
-卸载：在插件页关掉或移除这个插件；或者退出桌面端后运行 `dsh plugin --profile desktop remove dsh-nai5-prompting`。卸载后，用这个预设建的旧会话没法继续，装回来就能接着用。
+不要修改归档校验值来绕过错误。回退到稳定版时，使用新仓库地址下的 `v0.1.6` 标签；旧版不提供草稿编辑器。
 
 ## 使用
 
-1. 准备一个专门写提示词的目录作为工作区，例如 `~/NAI`。不要用代码仓库，免得混进别的文件。
-2. 在这个目录里放一份 `NAI.md`，写长期偏好、固定画师串、UC 和 OC 库的位置。模板见 [examples/studio/NAI.md](examples/studio/NAI.md)。每个会话都会自动读入它，压缩上下文后也会重新读入。
-3. 新建会话，选「NAI5 提示词」，直接说需求。默认会给出能直接复制的提示词：只给题材（例如“荷叶有关的场景”）或选了某个方向时，它先用几行写出替你补的画面方案，再给完整提示词，题材很开放时另附几个可换的方向。只想要点子、角色或服装设计、漫画分镜时，明确说“先给几个方向”“只要设计”就行。
-4. 要存东西时直接说，例如“把这个角色存进 OC 库”“存一下这版定稿”。未明确要求时不写工作区文件；稿纸的自动保存是独立的会话伴随数据。
-5. 照图反推：在输入框里附上图片。需要选一个能看图的模型（例如内置目录里的 `deepseek-flash`）；模型不支持图片时，dsh 会直接拒收带图的消息。
+1. 选择用于提示词编写的工作区。长期偏好可写在 `NAI.md` 中，格式见 [配置示例](examples/studio/NAI.md)。
+2. 新建或继续使用「NAI5 提示词」预设的会话。
+3. 打开右侧栏，选择「提示词稿纸」。
+4. 描述需求，或要求修改指定字段。可直接编辑草稿中的文本，再手动复制到 NovelAI 网站。
 
-## 记忆与上下文
+只需要构思时，明确要求“仅提供方案”。需要完整文本出现在聊天中时，明确要求输出文本。图像输入是否可用取决于所选模型。
 
-dsh 本身没有跨会话记忆。这个预设靠下面几样就够用，不需要另装记忆插件：
+编辑器自动保存草稿；工作区文件由文件工具按请求写入。角色的启用状态随草稿保存，切换状态不会改写主提示词。
 
-- **`NAI.md`**：长期偏好和资料索引，每个会话自动读入，压缩后重新读入，改了下一轮就生效。
-- **工作区文件**：OC 设定、定稿提示词存成文件，用到时再读。画师串、UC 和原串都要逐字保留，存成文件最可靠。
-- **`@` 引用**：在输入框里用 `@` 选一个旧会话，它的文字内容会作为只读背景带进来；`@文件` 只插入路径，由模型自己去读。
+## 同步与数据边界
 
-不推荐给写提示词装语义记忆 MCP（官方文档里的 Memorix、MCP Reference Memory、Engram）：这类工具会转述和模糊检索，而技能要求原串逐字保留。
+- 同一宿主实例内，写入按会话串行执行，并检查 `revision`。客户端仅在目标字段未被另一端改动时重放更新；同字段冲突需要选择保留的版本。
+- 写入成功以宿主存储返回成功为准。未提交的编辑保留在当前客户端内存中，不提供跨刷新或强制退出的恢复保证。
+- 当前没有跨进程锁、跨进程更新通知、草稿版本历史或会话分叉时的草稿继承。不要让多个宿主进程同时写同一份草稿存储。
+- 本插件控制预设中的工具和技能可见性；这不是进程隔离或权限沙箱。文件访问、工具授权及网络权限仍由 dsh 管理。
 
-已知局限：dsh 自动压缩用的总结提示词是写死的，按写代码的会话来写英文总结，没法配置。用 DeepSeek 的长上下文时很少会触发；真被压缩过，长期内容靠 `NAI.md` 和工作区文件补回来。
+数据格式、长度单位、错误响应和重试规则见 [API 参考](docs/api.md)。
 
-## 配置
+模型调用草稿工具时，工具返回完整草稿，包括停用角色的文本，供模型继续处理。手动编辑和自动保存本身不会发起模型请求。
 
-预设里 `isolation` 这一行（插件本身）有四个开关：
+## 预设配置
 
-| 键 | 默认 | 作用 |
+默认预设挂载提示词技能、文件读写、图像读取、用户提问、宿主可用的网页工具、草稿工具和上下文压缩组件。全局工具与技能默认不加入该预设的可见集合。
+
+| 配置项 | 默认值 | 含义 |
 |---|---|---|
-| `hideGlobalTools` | `true` | 隐藏全局工具（MCP、宿主插件、桌面端附加工具） |
-| `keepGlobalTools` | `[]` | 仍要保留的全局工具名，例如某个 MCP 工具的完整名字 |
-| `hideGlobalSkills` | `true` | 隐藏全局技能（例如桌面端的 Office 技能） |
-| `keepGlobalSkills` | `[]` | 仍要保留的全局技能名 |
+| `hideGlobalTools` | `true` | 从本预设中隐藏全局工具 |
+| `keepGlobalTools` | `[]` | 隐藏规则的工具例外列表 |
+| `hideGlobalSkills` | `true` | 从本预设中隐藏全局技能 |
+| `keepGlobalSkills` | `[]` | 隐藏规则的技能例外列表 |
 
-要改任何一项（包括预设名、系统提示词、工具），把 [cordis.patch.yml](cordis.patch.yml) 里的整行 `preset-nai5-prompting` 复制到你 profile 的 `cordis.patch.yml` 再改：dsh 的补丁会替换整行配置，只写改动的那一项会丢掉其余内容。
+项目说明文件入口为 `NAI.md`。宿主级说明和权限策略仍按 dsh 自身规则处理。模型的交稿习惯由预设说明与技能共同约定；插件不保证任何模型都能正确遵循这些说明。
 
-## 更新技能
+## 版本与验证范围
 
-`skills/` 是 nai5-prompting 某个发布标签的原样拷贝，`vendor.json` 记着标签、提交号和每个文件的 SHA-256。不要在这里改技能文件，测试会拦下。上游发了新版本时：
+| 项目 | 当前声明 |
+|---|---|
+| 安装器声明范围 | dsh `>=0.2.1-rc.5 <0.3.0-0` |
+| 实际验证的宿主 | dsh `0.2.1-rc.5` |
+| 草稿 HTTP 接口 | `/api/nai-desk/v1` |
+| 草稿数据格式 | `schemaVersion: 1` |
 
-```bash
-node scripts/sync-skills.mjs v1.3
-```
-
-脚本会克隆那个标签，按发布自带的 `SHA256SUMS.txt` 逐个校验，再整份替换 `skills/` 并重写 `vendor.json`。之后更新本文里的版本号，运行 `npm test`，再提交。
+安装器声明的版本范围不等于每个版本都经过验证。自动测试、隔离环境检查与实际模型质量评估是不同层次的证据。详见 [验证记录](docs/verification-0.2.0-preview.2.md) 和 [变更记录](CHANGELOG.md)。
 
 ## 开发
 
-```bash
-npm install --ignore-scripts
+```sh
+npm ci --ignore-scripts
 npm test
+npm pack
 ```
 
-测试会先构建预编译包；覆盖稿纸同步、冲突、会话隔离和界面状态，以及技能与 `vendor.json` 逐字节一致；补丁只插入一个预设、只挂允许的插件、系统提示词里没有会被插值的 `{{`；技能目录的路径表达式在 profile 布局下解析到 `skills/`；隔离插件在注册表替身上的行为。
+`npm test` 先构建，再运行测试；`npm pack` 只打包当前文件。发布前应确保 `lib/` 与源码一致。不要直接编辑构建产物。
 
-## 已验证
-
-**0.1.6，2026-11-02。** 只换了内置技能：nai5-prompting v1.2.8 按 Gemini 交来的上游问题报告改了 nai5-writing 的两份参考文件（用户只要动作和场景时只给 `Base Prompt:` 一块、两处旧的词序说明和模板对齐、例句说明补句末逗号）；各技能的 `SKILL.md` 没变，插件代码也没变。v1.2.8 另有给 Gemini 网页用的 strict / strict-safe 包，本插件仍用拆分版。这一版只跑了 `npm test`，没有重做下面的运行实测。
-
-**0.1.5，2026-10-30。** 只换了内置技能：nai5-prompting v1.2.7 把 v1.2.6 的「多人图一定写前缀」更正为人和人之间有互动才写 `source#`、`target#`、`mutual#`，各做各的不写；改的还是 nai5-writing 和 nai5-reverse-prompt 的参考文件，各技能的 `SKILL.md` 没变，插件代码也没变。这一版只跑了 `npm test`，没有重做下面的运行实测。
-
-**0.1.4，2026-10-30。** 只换了内置技能：nai5-prompting v1.2.6 改的是 nai5-writing 和 nai5-reverse-prompt 的参考文件（多人图一定写 `source#`、`target#`、`mutual#` 前缀），各技能的 `SKILL.md` 没变，插件代码也没变。这一版只跑了 `npm test`，没有重做下面的运行实测。
-
-**0.1.3，2026-10-30。** dsh 0.2.1-rc.3、0.2.1-rc.5（桌面端更新前后自带的 CLI）和 0.2.2-alpha.2（npm 上的官方包，装在临时目录），各用一个临时 `DSH_HOME` 的 `web` profile，装 `npm pack` 出的包。模型换成本机一个记录请求的假接口，没有用真实 key，直接核对 dsh 发给模型的内容。另加了一个启动 4 秒后才注册的全局测试工具，模拟 MCP 工具晚注册：
-
-- 预设出现在菜单里；输入 `/` 时技能区只有 11 个 nai5 技能。
-- 「NAI5 提示词」会话的请求：系统提示词只有本插件的说明；工具只有本预设挂载的那几个（0.2.1 上 8 个；0.2.2 上 7 个，因为没配搜索凭据时 dsh 不提供 `web_search`）；读入 `NAI.md`，不读 `AGENTS.md`；技能目录只有 nai5 技能。测试用的全局工具、全局技能和晚注册的工具都被隐藏，服务重启后接着用旧会话的第一步也一样。
-- 0.1.2 在 rc.3 上复现过晚注册的问题：那个工具会出现在第一步，第二步才被移除。0.1.3 改成工具注册表一有变化就屏蔽。
-
-**桌面端 0.2.1-rc.3 日常使用（0.1.2）。** 技能目录只有 11 个 nai5 技能，桌面端自带的 Office 技能被隐藏。MCP 和 Office 附加工具在每次启动后的第一步出现、第二步才被移除，就是上面那个问题，0.1.3 已修。
-
-**0.1.0，2026-10-20，dsh 0.2.1-rc.2。** 除上面的检查外还核对过：同一工作区的 Standard 会话照旧能看到全局工具和全局技能、读 `AGENTS.md` 不读 `NAI.md`、没有 nai5 技能；先开空会话再切到这个预设也生效；会话文件里没有自定义事件类型。
-
-技能调用的效果只在桌面端日常用过，没有系统测过。
+`skills/` 是上游版本快照，须与 `vendor.json` 的校验值一致。更新使用 `node scripts/sync-skills.mjs <tag>`，不直接修改技能正文。
 
 ## 许可
 
-GPL-3.0-only，见 [LICENSE](LICENSE) 和 [NOTICE](NOTICE)。`skills/` 里的技能版权归 Miint-Sunny，来自 [nai5-prompting](https://github.com/Miint-Sunny/nai5-prompting)，同样按 GPL-3.0-only 提供。
+GPL-3.0-only，见 [LICENSE](LICENSE) 与 [NOTICE](NOTICE)。内置技能来自 [nai5-prompting](https://github.com/Miint-Sunny/nai5-prompting)。随包分发的第三方代码保留各自许可声明。

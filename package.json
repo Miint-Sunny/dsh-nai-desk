@@ -1,7 +1,7 @@
 {
   "name": "dsh-nai5-prompting",
-  "version": "0.2.0-preview.1",
-  "description": "NAI Desk：DeepSeek Harness 的 NAI5 提示词预设、11 个写词技能和可编辑右侧稿纸",
+  "version": "0.2.0-preview.2",
+  "description": "DeepSeek Harness 的 NovelAI V5 提示词预设与会话草稿编辑器",
   "keywords": [
     "deepseek-harness",
     "dsh",
@@ -48,7 +48,7 @@
     "scripts",
     "LICENSE",
     "CHANGELOG.md",
-    "docs/verification-0.2.0-preview.1.md"
+    "docs"
   ],
   "scripts": {
     "test": "node --test test/*.test.mjs",

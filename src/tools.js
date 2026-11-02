@@ -1,7 +1,7 @@
 import { DeskError, LIMITS, sessionKey } from './desk.js'
 
 const string = { type: 'string' }
-const positionSchema = { type: 'object', properties: { x: { type: 'number', description: '0–1' }, y: { type: 'number', description: '0–1' } }, required: ['x', 'y'], additionalProperties: false }
+const positionSchema = { type: 'object', properties: { x: { type: 'number', description: '归一化水平位置，范围 0–1，从左到右。' }, y: { type: 'number', description: '归一化垂直位置，范围 0–1，从上到下。' } }, required: ['x', 'y'], additionalProperties: false }
 export const snapshotSchema = {
   type: 'object',
   properties: {
@@ -18,9 +18,9 @@ export const snapshotSchema = {
   additionalProperties: false,
 }
 
-const revision = { type: 'integer', description: 'desk_read 或上次成功写入返回的非负 revision。发生冲突时重新读，不猜版本。' }
-const number = { type: 'integer', description: `从 1 开始，最大 ${LIMITS.characters}` }
-const writeHint = '只修改指定字段，其他内容保留。写前读 desk_read；expected_revision 必须使用读到的版本，冲突时重新读取。'
+const revision = { type: 'integer', description: '使用最近一次读取或成功写入返回的 revision。版本冲突后须重新读取草稿。' }
+const number = { type: 'integer', description: `角色序号从 1 开始，实际范围取决于当前草稿，最多 ${LIMITS.characters} 条。` }
+const writeHint = 'expected_revision 用于版本检查。发生冲突时先读取当前草稿，再决定需要提交的修改。'
 
 function callingSession(exec) {
   exec?.signal?.throwIfAborted()
@@ -28,7 +28,8 @@ function callingSession(exec) {
 }
 
 function slot(n, maximum) {
-  if (!Number.isInteger(n) || n < 1 || n > maximum) throw new DeskError('invalid_input', `角色序号必须在 1 到 ${maximum} 之间，不能跳号`)
+  if (maximum === 0) throw new DeskError('invalid_input', '当前草稿没有可操作的角色提示词条目。')
+  if (!Number.isInteger(n) || n < 1 || n > maximum) throw new DeskError('invalid_input', `角色序号须为 1 到 ${maximum} 之间的整数。请重新读取草稿确认序号。`)
   return n - 1
 }
 
@@ -49,8 +50,8 @@ export function createDeskTools(store) {
       const id = callingSession(exec)
       const state = await store.read(id)
       if (state.revision !== args.expected_revision) {
-        if (!Number.isSafeInteger(args.expected_revision) || args.expected_revision < 0) throw new DeskError('invalid_input', 'expected_revision 必须是当前稿纸的 revision')
-        throw new DeskError('conflict', '稿纸已更新，请先重新调用 desk_read', state)
+        if (!Number.isSafeInteger(args.expected_revision) || args.expected_revision < 0) throw new DeskError('invalid_input', 'expected_revision 须使用读取结果中的非负整数版本。')
+        throw new DeskError('conflict', '草稿版本已变化，请重新调用 desk_read 后提交。', state)
       }
       const operation = build(args, state)
       exec?.signal?.throwIfAborted()
@@ -58,10 +59,10 @@ export function createDeskTools(store) {
     },
   )
   return [
-    define('desk_read', '读取当前会话稿纸的主串 main、总负面 uc、角色栏及 revision。用户在右侧面板的手动编辑也在这里。修改前先读，只改用户要求的部分。', {}, [], async (_args, exec) => store.read(callingSession(exec))),
-    write('desk_set_main', '将定稿主串写入当前会话的 Base Prompt（整段覆盖）。不生成图片、不写官网、不改角色和 UC。', { text: string }, ['text'], args => ({ type: 'set_main', text: args.text })),
-    write('desk_set_uc', '将总负面提示词写入当前会话的 UC。仅在用户需要时填写，不擅自补个人默认 UC。', { text: string }, ['text'], args => ({ type: 'set_uc', text: args.text })),
-    write('desk_set_character', '写第 n 个角色栏（从 1 开始），或在末尾添加。prompt 是正向正文；uc、name、enabled、position 省略时保留。position 为 null 时恢复自动位置。不会读取角色库。', {
+    define('desk_read', '返回当前会话提示词草稿的已提交快照，包括 main、uc、characters 和 revision。快照包含编辑器已成功保存的修改。', {}, [], async (_args, exec) => store.read(callingSession(exec))),
+    write('desk_set_main', '替换当前会话草稿的主提示词全文，保留负面提示词与角色条目。text 不做格式化或去重。', { text: string }, ['text'], args => ({ type: 'set_main', text: args.text })),
+    write('desk_set_uc', '替换当前会话草稿的草稿级负面提示词全文，保留其它字段。', { text: string }, ['text'], args => ({ type: 'set_uc', text: args.text })),
+    write('desk_set_character', '更新当前快照中第 n 个角色提示词条目；n 等于条目数加 1 时追加新条目。prompt 必填；更新时省略的 uc、name、enabled、position 保留原值。position 为 null 时清除自定义位置。', {
       n: number, prompt: string, uc: string, name: string, enabled: { type: 'boolean' }, position: { oneOf: [positionSchema, { type: 'null' }] },
     }, ['n', 'prompt'], (args, state) => {
       const index = slot(args.n, state.characters.length + 1)
@@ -73,7 +74,7 @@ export function createDeskTools(store) {
       }
       return { type: 'set_character', id: state.characters[index].id, patch }
     }),
-    write('desk_remove_character', '删除第 n 个角色栏。角色正文会从稿纸移除；仅在用户要求删除时使用。', { n: number }, ['n'], (args, state) => ({ type: 'remove_character', id: state.characters[slot(args.n, state.characters.length)].id })),
-    write('desk_move_character', '把第 n 个角色栏移动到第 to 位（均从 1 开始）。文字、角色身份与启用状态一同移动。', { n: number, to: number }, ['n', 'to'], (args, state) => ({ type: 'move_character', id: state.characters[slot(args.n, state.characters.length)].id, index: slot(args.to, state.characters.length) })),
+    write('desk_remove_character', '删除当前草稿中第 n 个角色提示词条目，包括其正向文本、UC 和元数据。后续条目的序号相应变化。', { n: number }, ['n'], (args, state) => ({ type: 'remove_character', id: state.characters[slot(args.n, state.characters.length)].id })),
+    write('desk_move_character', '将第 n 个角色提示词条目移至第 to 位；两个序号均从 1 开始。条目的稳定 id 和全部字段保持不变。', { n: number, to: number }, ['n', 'to'], (args, state) => ({ type: 'move_character', id: state.characters[slot(args.n, state.characters.length)].id, index: slot(args.to, state.characters.length) })),
   ]
 }

@@ -25,7 +25,7 @@ function IconButton({ label, icon, ...props }) {
 function PromptEditor({ client, field, value, label, rows = 5 }) {
   const composing = useRef(false)
   return <textarea
-    aria-label={label} value={value} rows={rows} spellCheck={false} placeholder={`在这里写${label}`}
+    aria-label={label} value={value} rows={rows} spellCheck={false} placeholder={field === 'main' ? '例如：outdoors, soft lighting' : field.endsWith(':prompt') ? '例如：girl, blue jacket' : ''}
     onCompositionStart={() => { composing.current = true }}
     onCompositionEnd={event => { composing.current = false; client.edit(field, event.currentTarget.value) }}
     onChange={event => client.edit(field, event.currentTarget.value, { deferSave: composing.current })}
@@ -57,7 +57,7 @@ function Character({ character, index, count, client, ui, setUi, busy, onDelete 
       <div className="nd-character-actions">
         <IconButton label={`上移角色 ${index + 1}`} icon="up" disabled={busy || index === 0} onClick={() => run({ type: 'move_character', id, index: index - 1 })} />
         <IconButton label={`下移角色 ${index + 1}`} icon="down" disabled={busy || index === count - 1} onClick={() => run({ type: 'move_character', id, index: index + 1 })} />
-        <IconButton label={`${character.enabled ? '停用' : '启用'}角色 ${index + 1}`} icon={character.enabled ? 'check' : 'minus'} aria-pressed={character.enabled} disabled={busy} onClick={() => run({ type: 'set_character', id, patch: { enabled: !character.enabled } })} />
+        <IconButton label={`启用角色 ${index + 1} 的提示词`} title={`${character.enabled ? '停用' : '启用'}角色 ${index + 1} 的提示词`} icon={character.enabled ? 'check' : 'minus'} aria-pressed={character.enabled} disabled={busy} onClick={() => run({ type: 'set_character', id, patch: { enabled: !character.enabled } })} />
         <IconButton label={`删除角色 ${index + 1}`} icon="trash" disabled={busy} onClick={() => onDelete(character, index)} />
         <IconButton label={`${collapsed ? '展开' : '收起'}角色 ${index + 1}`} icon={collapsed ? 'unfold' : 'fold'} aria-expanded={!collapsed} aria-controls={`nd-character-${id}`} onClick={() => setUi(previous => ({ ...previous, collapsed: { ...previous.collapsed, [id]: !collapsed } }))} />
       </div>
@@ -75,21 +75,21 @@ function Character({ character, index, count, client, ui, setUi, busy, onDelete 
 }
 
 function Conflict({ conflict, client }) {
-  const label = conflict.field === 'main' ? '主串' : conflict.field === 'uc' ? '总 UC' : conflict.field.endsWith(':name') ? '角色名称' : conflict.field.endsWith(':uc') ? '角色 UC' : '角色提示词'
+  const label = conflict.field === 'main' ? '主提示词' : conflict.field === 'uc' ? '草稿级 UC' : conflict.field.endsWith(':name') ? '角色名称' : conflict.field.endsWith(':uc') ? '角色级 UC' : '角色提示词'
   return <section className="nd-conflict" role="alert">
-    <strong>{conflict.deleted ? '角色已被另一端移除' : `${label}有另一份修改`}</strong>
+    <strong>{conflict.deleted ? '草稿中的该角色提示词已删除' : `${label}存在版本冲突`}</strong>
     {conflict.notice && <p>{conflict.notice}</p>}
-    <label>你的未保存文字<textarea readOnly value={conflict.local} rows={3} /></label>
-    {!conflict.deleted && <label>当前稿纸<textarea readOnly value={conflict.remote ?? ''} rows={3} /></label>}
+    <label>未保存的本地内容<textarea readOnly value={conflict.local} rows={3} /></label>
+    {!conflict.deleted && <label>当前已保存内容<textarea readOnly value={conflict.remote ?? ''} rows={3} /></label>}
     <div className="nd-conflict-actions">
       {!conflict.deleted && <button type="button" onClick={() => client.resolveConflict(conflict.field, 'local', conflict.revision).catch(() => {})}>保留我的修改</button>}
-      <button type="button" onClick={() => client.resolveConflict(conflict.field, 'remote', conflict.revision).catch(() => {})}>{conflict.deleted ? '放弃这段未保存修改' : '使用当前稿纸'}</button>
+      <button type="button" onClick={() => client.resolveConflict(conflict.field, 'remote', conflict.revision).catch(() => {})}>{conflict.deleted ? '放弃这段未保存内容' : '使用已保存版本'}</button>
     </div>
   </section>
 }
 
 export function Panel(props) {
-  if (typeof props.sessionId !== 'string') return <div className="nai-desk nd-message">先打开一个 NAI5 提示词会话。</div>
+  if (typeof props.sessionId !== 'string') return <div className="nai-desk nd-message">选择一个 NAI5 提示词会话以打开草稿。</div>
   return <SessionPanel key={props.sessionId} {...props} />
 }
 
@@ -110,12 +110,12 @@ function SessionPanel({ sessionId, sessionList, getClient, acquireClient, useTab
   }, [preset, visible, acquireClient, sessionId])
   useEffect(() => { try { localStorage.setItem(`dsh.nai-desk.ui.v1.${sessionId}`, JSON.stringify(ui)) } catch {} }, [sessionId, ui])
 
-  if (preset !== PRESET_ID) return <div className="nai-desk nd-message">稿纸用于 NAI5 提示词会话。</div>
-  if (!state.draft) return <div className="nai-desk nd-message" role="status">{state.error ?? '正在读取稿纸…'}{state.error && <button type="button" onClick={() => client.refresh()}>重试</button>}</div>
+  if (preset !== PRESET_ID) return <div className="nai-desk nd-message">选择使用 NAI5 提示词预设的会话以打开草稿。</div>
+  if (!state.draft) return <div className="nai-desk nd-message" role="status">{state.error ?? '正在加载草稿…'}{state.error && <button type="button" onClick={() => client.refresh()}>重新加载</button>}</div>
 
   const draft = state.draft
   const busy = state.commandPending
-  const saveLabel = state.phase === 'conflict' ? '有待处理的修改' : state.error ? '尚未保存' : busy ? '保存中…' : state.pending ? '有未保存的修改' : '已保存'
+  const saveLabel = state.phase === 'conflict' ? '存在版本冲突' : state.error ? '同步异常' : state.phase === 'saving' ? '正在保存…' : state.pending ? '等待保存…' : '已同步'
   const removeCharacter = async (character, index) => {
     try { await client.command({ type: 'remove_character', id: character.id }); setRemoved({ character: structuredClone(character), index }) } catch {}
   }
@@ -129,13 +129,13 @@ function SessionPanel({ sessionId, sessionList, getClient, acquireClient, useTab
     {state.error && <div className="nd-error" role="alert"><span>{state.error}</span><button type="button" onClick={() => state.pending ? client.flush().catch(() => {}) : client.refresh()}>重试</button></div>}
     {state.conflicts.map(conflict => <Conflict key={conflict.field} conflict={conflict} client={client} />)}
     <div className="nd-content">
-      <section className="nd-base nd-card" aria-label="主串与总负面">
+      <section className="nd-base nd-card" aria-label="主提示词与负面提示词">
         <div className="nd-editor-tools">
           <div className="nd-tabs" role="group" aria-label="主提示词类型">
             <button type="button" aria-pressed={ui.baseTab === 'main'} onClick={() => setUi(previous => ({ ...previous, baseTab: 'main' }))}>Base Prompt</button>
             <button type="button" aria-pressed={ui.baseTab === 'uc'} title="总负面提示词" onClick={() => setUi(previous => ({ ...previous, baseTab: 'uc' }))}>UC</button>
           </div>
-          <IconButton label={expanded ? '返回整份稿纸' : '展开到整个右栏'} icon={expanded ? 'restore' : 'expand'} aria-pressed={expanded} onClick={() => setExpanded(value => !value)} />
+          <IconButton label={expanded ? '还原编辑区' : '展开编辑区'} icon={expanded ? 'restore' : 'expand'} aria-pressed={expanded} onClick={() => setExpanded(value => !value)} />
         </div>
         <PromptEditor key={ui.baseTab} client={client} field={ui.baseTab} value={draft[ui.baseTab]} label={ui.baseTab === 'main' ? 'Base Prompt' : '总负面 UC'} rows={6} />
       </section>
@@ -146,6 +146,6 @@ function SessionPanel({ sessionId, sessionList, getClient, acquireClient, useTab
       </section>
     </div>
     {removed && <div className="nd-undo" role="status"><span>已移除 {removed.character.name || '角色栏'}</span><button type="button" disabled={busy} onClick={restoreCharacter}>撤销</button></div>}
-    <div className="nd-footer">选中文字即可自行复制 · 停用角色保留原文</div>
+    <div className="nd-footer">草稿按会话保存 · 可手动选择文本</div>
   </div>
 }
