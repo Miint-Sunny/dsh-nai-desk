@@ -27,6 +27,8 @@ Source: https://github.com/deepseek-ai/deepseek-harness/tree/dsh-v0.2.1-rc.5/pac
 Changes: local plugin class names, JavaScript/React adaptation, fixed prompt tab
 options, and theme-token typography. These controls do not load internal Client
 modules. The MIT terms below apply to these portions as well as bundled Zod.
+Editor surface rules also follow ui-conversation/src/client/skeleton/InputBar.module.css
+from that same DeepSeek Harness release and license.
 
 The host bundle includes Zod 4.4.3 under the MIT License:
 

@@ -4,7 +4,7 @@
 
 NAI Desk is a prompt-authoring plugin for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness), targeting NovelAI Diffusion V5. It provides an NAI5 preset and a session draft editor. Model tools and the editor operate on the same draft; image generation remains on the NovelAI website.
 
-Current version: **0.2.0-preview.3** (prerelease).
+Current version: **0.2.0-preview.4** (prerelease).
 
 ## Features
 
@@ -22,10 +22,10 @@ The plugin does not perform image generation or website form operations and incl
 Add an installation source in the DeepSeek Harness plugin manager, or use its CLI. Before running the CLI command below, fully quit the desktop app and TUI (⌘Q on macOS).
 
 ```sh
-dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.3
+dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.4
 ```
 
-A `.tgz` package is available on the [prerelease page](https://github.com/Miint-Sunny/dsh-nai-desk/releases/tag/v0.2.0-preview.3). Release packages contain compiled output and do not run this plugin's build during installation. Development installations can use `link:/absolute/path/to/checkout`; linked installs use working-tree files directly, so quit dsh before rebuilding or switching versions.
+A `.tgz` package is available on the [prerelease page](https://github.com/Miint-Sunny/dsh-nai-desk/releases/tag/v0.2.0-preview.4). Release packages contain compiled output and do not run this plugin's build during installation. Development installations can use `link:/absolute/path/to/checkout`; linked installs use working-tree files directly, so quit dsh before rebuilding or switching versions.
 
 ### Stable identifiers
 
@@ -43,7 +43,7 @@ If an upgrade from the old repository address fails an integrity check for the o
 
 ```sh
 dsh plugin --profile desktop remove dsh-nai5-prompting
-dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.3
+dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.4
 ```
 
 Do not replace integrity hashes to suppress an error. Stable `v0.1.6` remains available under the new repository address for rollback; it does not provide the draft editor.
@@ -92,7 +92,7 @@ Project instructions use `NAI.md`. Host-level instructions and permissions still
 | Draft HTTP API | `/api/nai-desk/v1` |
 | Stored draft schema | `schemaVersion: 1` |
 
-An engine range is not a claim that every matching release was tested. Automated tests, isolated-host checks, and model-quality evaluation provide different evidence. See the [verification record](docs/verification-0.2.0-preview.3.md) and [changelog](CHANGELOG.md).
+An engine range is not a claim that every matching release was tested. Automated tests, isolated-host checks, and model-quality evaluation provide different evidence. See the [verification record](docs/verification-0.2.0-preview.4.md) and [changelog](CHANGELOG.md).
 
 ## Development
 

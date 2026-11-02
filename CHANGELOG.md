@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.0-preview.4 · 2026-11-02
+
+- Correct the editor surface to use the host composer's input-major fill, l2 elevation stroke and soft shadow instead of an ordinary layer-1 card.
+- Remove the darker name-field fill and align placeholder color with the composer.
+- Compare computed backgrounds, borders and shadows against the real host composer in both themes; all checked values match.
+
 ## 0.2.0-preview.3 · 2026-11-02
 
 - Match the editor to DeepSeek Harness themes: semantic colors, shared typography, corner radii, hairline borders and keyboard focus.
