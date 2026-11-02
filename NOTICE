@@ -18,13 +18,22 @@ Bundled material
   and NOTICE files.
 
 This plugin runs inside DeepSeek Harness (https://github.com/deepseek-ai/deepseek-harness)
-and uses its published plugin interfaces; DeepSeek Harness is not bundled.
+and uses its published plugin interfaces. The Harness runtime is not bundled.
+
+src/controls.jsx, src/host-icons.jsx and the corresponding rules in src/style.css
+adapt Button, Input, SegmentedControl and selected icon artwork from DeepSeek
+Harness dsh-v0.2.1-rc.5, packages/client/ui-primitives/src, under the MIT License.
+Source: https://github.com/deepseek-ai/deepseek-harness/tree/dsh-v0.2.1-rc.5/packages/client/ui-primitives/src
+Changes: local plugin class names, JavaScript/React adaptation, fixed prompt tab
+options, and theme-token typography. These controls do not load internal Client
+modules. The MIT terms below apply to these portions as well as bundled Zod.
 
 The host bundle includes Zod 4.4.3 under the MIT License:
 
 MIT License
 
 Copyright (c) 2025 Colin McDonnell
+Copyright (c) 2026 DeepSeek
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

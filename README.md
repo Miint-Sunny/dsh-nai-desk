@@ -4,11 +4,12 @@
 
 NAI Desk 是 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的提示词编写插件，面向 NovelAI Diffusion V5。插件提供「NAI5 提示词」预设和会话草稿编辑器；模型工具与编辑器操作同一份草稿。图像生成仍在 NovelAI 网站完成。
 
-当前版本：**0.2.0-preview.2**（预发布）。
+当前版本：**0.2.0-preview.3**（预发布）。
 
 ## 功能
 
 - 编辑主提示词（Base Prompt）和草稿级负面提示词（UC）。
+- 界面沿用 dsh 的主题、字体和默认控件规范，随宿主切换浅色与深色；实现依据见 [编辑器样式](docs/ui.md)。
 - 管理角色提示词：正向文本、角色级 UC、显示名称、顺序、启用状态、删除撤销和折叠。
 - 模型通过 `desk_*` 工具更新草稿；编辑器自动提交手动修改，并在连接可用时接收已提交的更新。
 - 草稿按会话保存，重启后从宿主存储恢复。旧会话不会自动从历史回复提取草稿。
@@ -21,10 +22,10 @@ NAI Desk 是 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)
 可在 DeepSeek Harness 的插件管理器中添加安装源，也可使用配套的 `dsh` CLI。使用以下 CLI 命令前，请完全退出桌面端及 TUI；macOS 使用 **⌘Q**。
 
 ```sh
-dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.2
+dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.3
 ```
 
-也可安装 [预发布页](https://github.com/Miint-Sunny/dsh-nai-desk/releases/tag/v0.2.0-preview.2) 的 `.tgz` 文件。发布包包含编译产物，安装过程不执行本插件的构建脚本。开发环境可使用 `link:/absolute/path/to/checkout`；链接安装会直接使用该工作区的文件，切换版本或构建前应退出 dsh。
+也可安装 [预发布页](https://github.com/Miint-Sunny/dsh-nai-desk/releases/tag/v0.2.0-preview.3) 的 `.tgz` 文件。发布包包含编译产物，安装过程不执行本插件的构建脚本。开发环境可使用 `link:/absolute/path/to/checkout`；链接安装会直接使用该工作区的文件，切换版本或构建前应退出 dsh。
 
 ### 标识符兼容
 
@@ -42,7 +43,7 @@ dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.
 
 ```sh
 dsh plugin --profile desktop remove dsh-nai5-prompting
-dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.2
+dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.3
 ```
 
 不要修改归档校验值来绕过错误。回退到稳定版时，使用新仓库地址下的 `v0.1.6` 标签；旧版不提供草稿编辑器。
@@ -91,7 +92,7 @@ dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.
 | 草稿 HTTP 接口 | `/api/nai-desk/v1` |
 | 草稿数据格式 | `schemaVersion: 1` |
 
-安装器声明的版本范围不等于每个版本都经过验证。自动测试、隔离环境检查与实际模型质量评估是不同层次的证据。详见 [验证记录](docs/verification-0.2.0-preview.2.md) 和 [变更记录](CHANGELOG.md)。
+安装器声明的版本范围不等于每个版本都经过验证。自动测试、隔离环境检查与实际模型质量评估是不同层次的证据。详见 [验证记录](docs/verification-0.2.0-preview.3.md) 和 [变更记录](CHANGELOG.md)。
 
 ## 开发
 

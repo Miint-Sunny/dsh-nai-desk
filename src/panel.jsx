@@ -1,26 +1,26 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { PRESET_ID } from './protocol.js'
+import { Button, PromptTabs } from './controls.jsx'
+import { HostIcon } from './host-icons.jsx'
 
 export function Icon({ kind }) {
+  if (['up', 'down', 'check', 'trash', 'expand', 'plus'].includes(kind)) return <HostIcon kind={kind} />
   const paths = {
-    up: <path d="m6 14 6-6 6 6" />,
-    down: <path d="m6 10 6 6 6-6" />,
-    check: <path d="m5 12 4 4L19 6" />,
     minus: <path d="M5 12h14" />,
-    trash: <><path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 10v7M14 10v7" /></>,
-    expand: <path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5" />,
     restore: <path d="M3 8h5V3M21 8h-5V3M8 21v-5H3M16 21v-5h5" />,
     fold: <path d="m7 3 5 5 5-5M7 21l5-5 5 5M5 12h14" />,
     unfold: <path d="m7 8 5-5 5 5M7 16l5 5 5-5M5 12h14" />,
-    plus: <path d="M12 4v16M4 12h16" />,
     notebook: <><path d="M7 3h13v18H7zM3 7h6M3 12h6M3 17h6M12 8h4M12 12h4" /></>,
   }
-  return <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[kind]}</svg>
+  return <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[kind]}</svg>
 }
 
 function IconButton({ label, icon, ...props }) {
-  return <button type="button" className="nd-icon" title={label} aria-label={label} {...props}><Icon kind={icon} /></button>
+  return <Button className="nd-icon" title={label} aria-label={label} {...props}><Icon kind={icon} /></Button>
 }
+
+const baseOptions = [{ value: 'main', label: 'Base Prompt' }, { value: 'uc', label: 'UC', title: '总负面提示词' }]
+const characterOptions = [{ value: 'prompt', label: 'Prompt' }, { value: 'uc', label: 'UC', title: '角色负面提示词' }]
 
 function PromptEditor({ client, field, value, label, rows = 5 }) {
   const composing = useRef(false)
@@ -43,6 +43,7 @@ function readUi(sessionId) {
 }
 
 function Character({ character, index, count, client, ui, setUi, busy, onDelete }) {
+  const tabsId = useId()
   const id = character.id
   const collapsed = ui.collapsed[id] === true
   const tab = ui.tabs[id] === 'uc' ? 'uc' : 'prompt'
@@ -51,9 +52,9 @@ function Character({ character, index, count, client, ui, setUi, busy, onDelete 
   return <section className={`nd-card nd-character${character.enabled ? '' : ' nd-disabled'}`}>
     <div className="nd-character-head">
       <span className="nd-gender" aria-hidden="true">{gender}</span>
-      <input aria-label={`角色 ${index + 1} 名称`} className="nd-name" value={character.name} maxLength={128}
+      <span className="nd-name-field"><input aria-label={`角色 ${index + 1} 名称`} className="nd-name" value={character.name} maxLength={128}
         onChange={event => client.edit(`character:${id}:name`, event.currentTarget.value)}
-        onBlur={() => client.flush().catch(() => {})} />
+        onBlur={() => client.flush().catch(() => {})} /></span>
       <div className="nd-character-actions">
         <IconButton label={`上移角色 ${index + 1}`} icon="up" disabled={busy || index === 0} onClick={() => run({ type: 'move_character', id, index: index - 1 })} />
         <IconButton label={`下移角色 ${index + 1}`} icon="down" disabled={busy || index === count - 1} onClick={() => run({ type: 'move_character', id, index: index + 1 })} />
@@ -64,12 +65,12 @@ function Character({ character, index, count, client, ui, setUi, busy, onDelete 
     </div>
     <div className="nd-character-body" id={`nd-character-${id}`} hidden={collapsed}>
       <div className="nd-editor-tools">
-        <div className="nd-tabs" role="group" aria-label={`角色 ${index + 1} 提示词类型`}>
-          <button type="button" aria-pressed={tab === 'prompt'} onClick={() => setUi(previous => ({ ...previous, tabs: { ...previous.tabs, [id]: 'prompt' } }))}>Prompt</button>
-          <button type="button" aria-pressed={tab === 'uc'} title="角色负面提示词" onClick={() => setUi(previous => ({ ...previous, tabs: { ...previous.tabs, [id]: 'uc' } }))}>UC</button>
-        </div>
+        <PromptTabs id={tabsId} value={tab} options={characterOptions} label={`角色 ${index + 1} 提示词类型`}
+          onChange={value => setUi(previous => ({ ...previous, tabs: { ...previous.tabs, [id]: value } }))} />
       </div>
-      <PromptEditor client={client} field={`character:${id}:${tab}`} value={character[tab]} label={`角色 ${index + 1} ${tab === 'prompt' ? '正向提示词' : 'UC'}`} />
+      {characterOptions.map(option => <div key={option.value} role="tabpanel" id={`${tabsId}-${option.value}-panel`} aria-labelledby={`${tabsId}-${option.value}`} hidden={tab !== option.value}>
+        <PromptEditor client={client} field={`character:${id}:${option.value}`} value={character[option.value]} label={`角色 ${index + 1} ${option.value === 'prompt' ? '正向提示词' : 'UC'}`} />
+      </div>)}
     </div>
   </section>
 }
@@ -82,8 +83,8 @@ function Conflict({ conflict, client }) {
     <label>未保存的本地内容<textarea readOnly value={conflict.local} rows={3} /></label>
     {!conflict.deleted && <label>当前已保存内容<textarea readOnly value={conflict.remote ?? ''} rows={3} /></label>}
     <div className="nd-conflict-actions">
-      {!conflict.deleted && <button type="button" onClick={() => client.resolveConflict(conflict.field, 'local', conflict.revision).catch(() => {})}>保留我的修改</button>}
-      <button type="button" onClick={() => client.resolveConflict(conflict.field, 'remote', conflict.revision).catch(() => {})}>{conflict.deleted ? '放弃这段未保存内容' : '使用已保存版本'}</button>
+      {!conflict.deleted && <Button onClick={() => client.resolveConflict(conflict.field, 'local', conflict.revision).catch(() => {})}>保留我的修改</Button>}
+      <Button onClick={() => client.resolveConflict(conflict.field, 'remote', conflict.revision).catch(() => {})}>{conflict.deleted ? '放弃这段未保存内容' : '使用已保存版本'}</Button>
     </div>
   </section>
 }
@@ -94,6 +95,7 @@ export function Panel(props) {
 }
 
 function SessionPanel({ sessionId, sessionList, getClient, acquireClient, useTabInfo }) {
+  const tabsId = useId()
   const presetSnapshot = useCallback(() => sessionList.getSnapshot().byId[sessionId]?.projectionValues?.agentPreset, [sessionList, sessionId])
   const preset = useSyncExternalStore(sessionList.subscribe, presetSnapshot, presetSnapshot)
   const client = useMemo(() => getClient(sessionId), [getClient, sessionId])
@@ -111,7 +113,7 @@ function SessionPanel({ sessionId, sessionList, getClient, acquireClient, useTab
   useEffect(() => { try { localStorage.setItem(`dsh.nai-desk.ui.v1.${sessionId}`, JSON.stringify(ui)) } catch {} }, [sessionId, ui])
 
   if (preset !== PRESET_ID) return <div className="nai-desk nd-message">选择使用 NAI5 提示词预设的会话以打开草稿。</div>
-  if (!state.draft) return <div className="nai-desk nd-message" role="status">{state.error ?? '正在加载草稿…'}{state.error && <button type="button" onClick={() => client.refresh()}>重新加载</button>}</div>
+  if (!state.draft) return <div className="nai-desk nd-message" role="status">{state.error ?? '正在加载草稿…'}{state.error && <Button onClick={() => client.refresh()}>重新加载</Button>}</div>
 
   const draft = state.draft
   const busy = state.commandPending
@@ -126,26 +128,26 @@ function SessionPanel({ sessionId, sessionList, getClient, acquireClient, useTab
 
   return <div className={`nai-desk${expanded ? ' nd-expanded' : ''}`} onKeyDown={event => { if (event.key === 'Escape' && expanded) { setExpanded(false); event.stopPropagation() } }}>
     <div className="nd-status">{saveLabel}</div>
-    {state.error && <div className="nd-error" role="alert"><span>{state.error}</span><button type="button" onClick={() => state.pending ? client.flush().catch(() => {}) : client.refresh()}>重试</button></div>}
+    {state.error && <div className="nd-error" role="alert"><span>{state.error}</span><Button onClick={() => state.pending ? client.flush().catch(() => {}) : client.refresh()}>重试</Button></div>}
     {state.conflicts.map(conflict => <Conflict key={conflict.field} conflict={conflict} client={client} />)}
     <div className="nd-content">
       <section className="nd-base nd-card" aria-label="主提示词与负面提示词">
         <div className="nd-editor-tools">
-          <div className="nd-tabs" role="group" aria-label="主提示词类型">
-            <button type="button" aria-pressed={ui.baseTab === 'main'} onClick={() => setUi(previous => ({ ...previous, baseTab: 'main' }))}>Base Prompt</button>
-            <button type="button" aria-pressed={ui.baseTab === 'uc'} title="总负面提示词" onClick={() => setUi(previous => ({ ...previous, baseTab: 'uc' }))}>UC</button>
-          </div>
+          <PromptTabs id={tabsId} value={ui.baseTab} options={baseOptions} label="主提示词类型"
+            onChange={value => setUi(previous => ({ ...previous, baseTab: value }))} />
           <IconButton label={expanded ? '还原编辑区' : '展开编辑区'} icon={expanded ? 'restore' : 'expand'} aria-pressed={expanded} onClick={() => setExpanded(value => !value)} />
         </div>
-        <PromptEditor key={ui.baseTab} client={client} field={ui.baseTab} value={draft[ui.baseTab]} label={ui.baseTab === 'main' ? 'Base Prompt' : '总负面 UC'} rows={6} />
+        {baseOptions.map(option => <div className="nd-prompt-panel" key={option.value} role="tabpanel" id={`${tabsId}-${option.value}-panel`} aria-labelledby={`${tabsId}-${option.value}`} hidden={ui.baseTab !== option.value}>
+          <PromptEditor client={client} field={option.value} value={draft[option.value]} label={option.value === 'main' ? 'Base Prompt' : '总负面 UC'} rows={6} />
+        </div>)}
       </section>
       <section className="nd-characters" aria-label="角色提示词" hidden={expanded}>
         <div className="nd-section-label"><span>角色提示词</span><span>{draft.characters.length} 个角色</span></div>
         <div className="nd-character-list">{draft.characters.map((character, index) => <Character key={character.id} character={character} index={index} count={draft.characters.length} client={client} ui={ui} setUi={setUi} busy={busy} onDelete={removeCharacter} />)}</div>
-        <button type="button" className="nd-add" disabled={busy || draft.characters.length >= 22} onClick={() => client.command({ type: 'add_character', character: {} }).catch(() => {})}><Icon kind="plus" />添加角色栏</button>
+        <Button variant="outline" size="md" className="nd-add" disabled={busy || draft.characters.length >= 22} onClick={() => client.command({ type: 'add_character', character: {} }).catch(() => {})}><Icon kind="plus" />添加角色栏</Button>
       </section>
     </div>
-    {removed && <div className="nd-undo" role="status"><span>已移除 {removed.character.name || '角色栏'}</span><button type="button" disabled={busy} onClick={restoreCharacter}>撤销</button></div>}
+    {removed && <div className="nd-undo" role="status"><span>已移除 {removed.character.name || '角色栏'}</span><Button disabled={busy} onClick={restoreCharacter}>撤销</Button></div>}
     <div className="nd-footer">草稿按会话保存 · 可手动选择文本</div>
   </div>
 }

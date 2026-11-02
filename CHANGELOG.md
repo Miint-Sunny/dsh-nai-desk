@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0-preview.3 · 2026-11-02
+
+- Match the editor to DeepSeek Harness themes: semantic colors, shared typography, corner radii, hairline borders and keyboard focus.
+- Adapt the host's Button, Input, SegmentedControl and selected icons locally, following its third-party plugin guidance; no internal Client-module imports.
+- Add arrow-key and Home/End navigation to prompt tabs with associated panels and roving focus.
+- Follow the host's text font and content size settings; keep character actions usable in narrow panels.
+- Preserve draft operations, API contracts, installed identifiers and all vendored skills.
+
 ## 0.2.0-preview.2 · 2026-11-02
 
 ### Changed
