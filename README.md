@@ -27,7 +27,7 @@ NAI Desk 是 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)
 dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.7
 ```
 
-也可安装 [预发布页](https://github.com/Miint-Sunny/dsh-nai-desk/releases/tag/v0.2.0-preview.7) 的 `.tgz` 文件。发布包包含编译产物，安装过程不执行本插件的构建脚本。开发环境可使用 `link:/absolute/path/to/checkout`；链接安装会直接使用该工作区的文件，切换版本或构建前应退出 dsh。
+版本标签已包含编译产物，安装过程不执行本插件的构建脚本。开发环境可使用 `link:/absolute/path/to/checkout`；链接安装会直接使用该工作区的文件，切换版本或构建前应退出 dsh。
 
 ### 标识符兼容
 

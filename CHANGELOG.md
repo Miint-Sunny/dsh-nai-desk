@@ -8,6 +8,7 @@
 - Make the full-column tool follow the host's fullscreen button: its label and glyph change with the state instead of relying on a background color.
 - Rewrite the panel and chat-card copy to one vocabulary (稿纸, 主提示词, UC, 角色, 版本, 恢复此版本, 返回当前版本, 保存中…/已保存) and record it in docs/ui.md. Format history times with `Intl`, list every changed part, and show a masked span's original text in full.
 - History versions keep showing mask and enabled states read-only instead of swapping in text tags.
+- Publish versions as Git tags only. The README no longer points to a prerelease page with a `.tgz` package.
 
 ## 0.2.0-preview.6 · 2026-11-03
 

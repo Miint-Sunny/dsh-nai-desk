@@ -27,7 +27,7 @@ Add an installation source in the DeepSeek Harness plugin manager, or use its CL
 dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.7
 ```
 
-A `.tgz` package is available on the [prerelease page](https://github.com/Miint-Sunny/dsh-nai-desk/releases/tag/v0.2.0-preview.7). Release packages contain compiled output and do not run this plugin's build during installation. Development installations can use `link:/absolute/path/to/checkout`; linked installs use working-tree files directly, so quit dsh before rebuilding or switching versions.
+Release tags include compiled output, and installation does not run this plugin's build. Development installations can use `link:/absolute/path/to/checkout`; linked installs use working-tree files directly, so quit dsh before rebuilding or switching versions.
 
 ### Stable identifiers
 
