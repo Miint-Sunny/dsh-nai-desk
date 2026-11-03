@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.0 · 2026-11-03
+
+- First stable NAI Desk release. The plugin code is 0.2.0-preview.7 unchanged; this release updates version metadata and documentation only.
+- Compared with 0.1.6, the 「NAI5 提示词」 preset gains a per-session prompt sheet (稿纸) in the right sidebar: Base prompt/UC and character editors, ordering, enabling, deleting with undo, folding and full-column editing; masking text from the model; version history; and a chat card that reopens the sheet. Models edit the same sheet through `desk_*` tools with revision checks.
+- Keep the install identity `dsh-nai5-prompting`, the preset ID `nai5-prompting` and the vendored nai5-prompting v1.2.8 skills, byte-identical to 0.1.6. Requires dsh 0.2.1-rc.5 or newer below 0.3.0. The repository is now dsh-nai-desk; the README covers upgrading from the old address.
+
 ## 0.2.0-preview.7 · 2026-11-03
 
 - Show masking with the eye itself: the toggle uses the host's credential reveal artwork, an open eye while the model can read the field or character and a closed eye while it cannot. The text tag is gone. The accessible name stays fixed with `aria-pressed`, and a masked Base/UC field also marks its tab.

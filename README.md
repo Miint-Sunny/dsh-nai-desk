@@ -4,7 +4,7 @@
 
 NAI Desk 是 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的提示词编写插件，面向 NovelAI Diffusion V5。插件提供「NAI5 提示词」预设和按会话保存的稿纸；模型工具与稿纸编辑的是同一份内容。图像生成仍在 NovelAI 网站完成。
 
-当前版本：**0.2.0-preview.7**（预发布）。
+当前版本：**0.2.0**。
 
 ## 功能
 
@@ -24,7 +24,7 @@ NAI Desk 是 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)
 可在 DeepSeek Harness 的插件管理器中添加安装源，也可使用配套的 `dsh` CLI。使用以下 CLI 命令前，请完全退出桌面端及 TUI；macOS 使用 **⌘Q**。
 
 ```sh
-dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.7
+dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0
 ```
 
 版本标签已包含编译产物，安装过程不执行本插件的构建脚本。开发环境可使用 `link:/absolute/path/to/checkout`；链接安装会直接使用该工作区的文件，切换版本或构建前应退出 dsh。
@@ -45,10 +45,10 @@ dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.
 
 ```sh
 dsh plugin --profile desktop remove dsh-nai5-prompting
-dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.7
+dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0
 ```
 
-不要修改归档校验值来绕过错误。回退到稳定版时，使用新仓库地址下的 `v0.1.6` 标签；旧版没有稿纸。
+不要修改归档校验值来绕过错误。需要回退到 0.1.x 时，使用新仓库地址下的 `v0.1.6` 标签；0.1.x 没有稿纸。
 
 ## 使用
 
@@ -94,7 +94,7 @@ dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0-preview.
 | 稿纸 HTTP 接口 | `/api/nai-desk/v1` |
 | 稿纸数据格式 | `schemaVersion: 1` |
 
-安装器声明的版本范围不等于每个版本都经过验证。自动测试、隔离环境检查与实际模型质量评估是不同层次的证据。详见 [验证记录](docs/verification-0.2.0-preview.6.md) 和 [变更记录](CHANGELOG.md)。
+安装器声明的版本范围不等于每个版本都经过验证。自动测试、隔离环境检查与实际模型质量评估是不同层次的证据。详见 [验证记录](docs/verification-0.2.0.md) 和 [变更记录](CHANGELOG.md)。
 
 ## 开发
 
