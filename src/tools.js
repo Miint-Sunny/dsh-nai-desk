@@ -37,9 +37,10 @@ export function modelView(state) {
 }
 
 function keepsPlaceholders(state, before, after, label) {
-  const missing = [...new Set(tokensIn(before))].filter(token => !after.includes(token))
+  const allowed = new Set(tokensIn(before))
+  const missing = [...allowed].filter(token => !after.includes(token))
   if (missing.length) throw new DeskError('masked', `${label}里漏掉了屏蔽占位 ${missing.join('、')}。这些占位代表用户不让你看到的内容，请原样保留后重新提交。`)
-  const unknown = [...new Set(tokensIn(after))].filter(token => state.secrets?.[token] === undefined)
+  const unknown = [...new Set(tokensIn(after))].filter(token => !allowed.has(token) || state.secrets?.[token] === undefined)
   if (unknown.length) throw new DeskError('masked', `${unknown.join('、')} 不是这份稿纸里的屏蔽占位，不要自己编造占位。`)
 }
 

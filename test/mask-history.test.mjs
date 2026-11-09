@@ -54,6 +54,25 @@ test('whole fields and characters the user masked can be neither read nor writte
   await assert.rejects(run('desk_set_uc', { expected_revision: 0, text: 'x' }), error => !/secret scene/.test(JSON.stringify(error.current)))
 })
 
+test('S-002 model writes cannot move or revive masked spans in another field', async () => {
+  const { store, run } = setup()
+  let s = await store.mutate('s', 0, { type: 'set_main', text: 'private fixture' })
+  s = await store.mutate('s', s.revision, { type: 'mask_span', field: 'main', text: '⟪屏蔽1⟫', token: '⟪屏蔽1⟫', secret: 'private fixture' })
+  s = await store.mutate('s', s.revision, { type: 'add_character', character: { prompt: 'visible' } })
+  for (const [name, args] of [
+    ['desk_set_uc', { text: '⟪屏蔽1⟫' }],
+    ['desk_set_character', { n: 1, prompt: '⟪屏蔽1⟫' }],
+    ['desk_set_character', { n: 1, prompt: 'visible', uc: '⟪屏蔽1⟫' }],
+    ['desk_set_character', { n: 2, prompt: '⟪屏蔽1⟫' }],
+  ]) {
+    await assert.rejects(run(name, { expected_revision: s.revision, ...args }), { code: 'masked' })
+    assert.deepEqual(await store.read('s'), s)
+  }
+  s = await store.mutate('s', s.revision, { type: 'set_main', text: 'removed by user' })
+  await assert.rejects(run('desk_set_main', { expected_revision: s.revision, text: '⟪屏蔽1⟫' }), { code: 'masked' })
+  assert.deepEqual(await store.read('s'), s)
+})
+
 test('history records who wrote, merges bursts, keeps an earlier baseline and restores as a new step', async () => {
   const { store, run, tick } = setup()
   let s = await store.mutate('s', 0, { type: 'set_main', text: 'mine' })
