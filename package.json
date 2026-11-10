@@ -27,11 +27,9 @@
     "./locale/*.json": "./locale/*.json",
     "./client": "./lib/client.js",
     "./tools": "./lib/tools.js",
-    "./isolation": "./lib/isolation.js",
     "./api": {
       "types": "./src/api.d.ts"
-    },
-    "./host": "./lib/host.js"
+    }
   },
   "files": [
     "lib",
