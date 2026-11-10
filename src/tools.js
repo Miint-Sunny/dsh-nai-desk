@@ -78,9 +78,8 @@ export function checkModelWrite(state, operation) {
   return operation
 }
 
-const revision = { type: 'integer', description: '使用最近一次读取或成功写入返回的 revision。版本冲突后须重新读取草稿。' }
-const number = { type: 'integer', description: `角色序号从 1 开始，实际范围取决于当前草稿，最多 ${LIMITS.characters} 条。` }
-const writeHint = 'expected_revision 用于版本检查。发生冲突时先读取当前草稿，再决定需要提交的修改。改写含 ⟪屏蔽N⟫ 的字段时原样保留占位；用户整栏屏蔽的字段和角色不能写入。'
+const revision = { type: 'integer', description: '最近一次读取或写入返回的 revision。' }
+const number = { type: 'integer', description: `角色序号从 1 开始，最多 ${LIMITS.characters} 条。` }
 
 function callingSession(exec) {
   exec?.signal?.throwIfAborted()
@@ -104,7 +103,7 @@ export function createDeskTools(store) {
     execute,
   })
   const write = (name, description, properties, required, build) => define(
-    name, `${description} ${writeHint}`,
+    name, description,
     { expected_revision: revision, ...properties }, ['expected_revision', ...required],
     async (args, exec) => {
       const id = callingSession(exec)
