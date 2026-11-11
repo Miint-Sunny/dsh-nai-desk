@@ -104,7 +104,7 @@ export class DeskClient {
       const remote = fieldValue(snapshot, field)
       if (remote !== conflict.remote) this.#conflicts.set(field, {
         ...conflict, remote, deleted: remote === undefined, revision: snapshot.revision,
-        notice: '已保存的版本又有更新，请重新比较后再选择。',
+        notice: '已保存的版本已更新，请重新比较后再选择。',
       })
     }
   }
@@ -195,14 +195,14 @@ export class DeskClient {
     const conflict = this.#conflicts.get(field)
     if (!pending || !conflict) return
     if (shownRevision !== conflict.revision) {
-      this.#conflicts.set(field, { ...conflict, notice: '已保存的版本又有更新，请重新比较后再选择。' })
+      this.#conflicts.set(field, { ...conflict, notice: '已保存的版本已更新，请重新比较后再选择。' })
       this.#publish()
       return
     }
     if (choice === 'remote') this.#pending.delete(field)
     else if (choice === 'local') {
       const remote = fieldValue(this.#server, field)
-      if (remote === undefined) throw new Error('该角色已被删除。先复制未保存的内容，再决定是否添加新角色。')
+      if (remote === undefined) throw new Error('该角色已被删除。请先复制未保存的内容，再决定是否添加新角色。')
       pending.base = remote
     } else throw new Error('冲突处理方式必须是 local 或 remote。')
     this.#conflicts.delete(field)

@@ -172,10 +172,10 @@ function Conflict({ conflict, client }) {
   return <section className="nd-conflict" role="alert">
     <strong>{conflict.deleted ? '该角色已被删除，未保存的修改无法写入' : `${label}的修改与已保存的版本冲突`}</strong>
     {conflict.notice && <p>{conflict.notice}</p>}
-    <label>你的修改（未保存）<textarea readOnly value={conflict.local} rows={3} /></label>
+    <label>本地修改（未保存）<textarea readOnly value={conflict.local} rows={3} /></label>
     {!conflict.deleted && <label>已保存的版本<textarea readOnly value={conflict.remote ?? ''} rows={3} /></label>}
     <div className="nd-conflict-actions">
-      {!conflict.deleted && <Button variant="outline" onClick={() => client.resolveConflict(conflict.field, 'local', conflict.revision).catch(() => {})}>保留你的修改</Button>}
+      {!conflict.deleted && <Button variant="outline" onClick={() => client.resolveConflict(conflict.field, 'local', conflict.revision).catch(() => {})}>保留本地修改</Button>}
       <Button variant="outline" onClick={() => client.resolveConflict(conflict.field, 'remote', conflict.revision).catch(() => {})}>{conflict.deleted ? '放弃未保存的修改' : '使用已保存的版本'}</Button>
     </div>
   </section>
