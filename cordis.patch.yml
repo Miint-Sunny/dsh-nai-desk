@@ -1,11 +1,11 @@
-# dsh-nai5-prompting: inserts the 「NAI5 提示词」 agent preset. Every row below
+# @miint-sunny/dsh-nai-desk: inserts the 「NAI5 提示词」 agent preset. Every row below
 # mounts inside the preset's own scope, so other presets keep their tools,
 # skills and system prompt, and this preset sees none of theirs.
 # To change a value, copy this whole row into your profile's cordis.patch.yml:
 # a patch replaces the row's entire config, including the plugin list.
 - insert:
     - id: nai-desk
-      name: dsh-nai5-prompting
+      name: '@miint-sunny/dsh-nai-desk'
       config:
         mode: desk
     - id: preset-nai5-prompting
@@ -60,7 +60,7 @@
           # Hides global tools (MCP servers, host plugins, Desktop add-ons) and
           # global skills (for example Desktop's Office skills) in this preset.
           - id: isolation
-            name: dsh-nai5-prompting
+            name: '@miint-sunny/dsh-nai-desk'
             config:
               hideGlobalTools: true
               keepGlobalTools: []
@@ -100,7 +100,7 @@
               includeDefaultRoots: false
               watch: false
               customSkillDirs:
-                - !!js process.getBuiltinModule('node:path').join(process.getBuiltinModule('node:path').dirname(process.getBuiltinModule('node:module').createRequire(baseUrl).resolve('dsh-nai5-prompting/package.json')), 'skills')
+                - !!js process.getBuiltinModule('node:path').join(process.getBuiltinModule('node:path').dirname(process.getBuiltinModule('node:module').createRequire(baseUrl).resolve('@miint-sunny/dsh-nai-desk/package.json')), 'skills')
           - id: tool-skill
             name: '@deepseek-ai/dsh-tool-skill'
           - id: compaction
@@ -114,4 +114,4 @@
               - id: command-compact
                 name: '@deepseek-ai/dsh-command-compact'
           - id: nai-desk-tools
-            name: dsh-nai5-prompting/tools
+            name: '@miint-sunny/dsh-nai-desk/tools'

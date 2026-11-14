@@ -3,7 +3,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, symlinkSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { parse } from 'yaml'
 import { Config } from '../src/isolation.js'
@@ -111,8 +111,9 @@ test('the skill provider reads only the vendored skills directory', () => {
   assert.equal(config.customSkillDirs.length, 1)
   const profile = mkdtempSync(join(tmpdir(), 'nai5-profile-'))
   try {
-    mkdirSync(join(profile, 'node_modules'))
-    symlinkSync(ROOT, join(profile, 'node_modules', pkg.name), 'dir')
+    const installation = join(profile, 'node_modules', pkg.name)
+    mkdirSync(dirname(installation), { recursive: true })
+    symlinkSync(ROOT, installation, 'dir')
     // The loader evaluates `!!js` with the profile directory as `baseUrl`.
     const evaluate = new Function('baseUrl', 'process', `return (${config.customSkillDirs[0].js})`)
     const dir = evaluate(pathToFileURL(`${profile}/`).href, process)

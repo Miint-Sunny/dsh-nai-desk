@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Prepare the standalone npm identity `@miint-sunny/dsh-nai-desk`, including scoped host/tool module locators, the bundled skill path, and the client module loader ID. The scoped package has not been published; keep version 0.2.0 while preparing this new package identity.
+- Export `./cordis.patch.yml` and limit the archive to prebuilt runtime files, public API types, locales, skills and license/provenance material. Exclude build scripts, implementation sources, examples and internal docs.
+- Document standalone plugin-page/CLI installation and removal of `dsh-nai5-prompting` before adding the scoped package. Preserve all row IDs, the `nai5-prompting` preset ID, authenticated API path, service/storage identifiers, GPL-3.0-only licensing and every vendored byte.
+
 ## 0.2.0 · 2026-11-03
 
 - First stable NAI Desk release. The plugin code is 0.2.0-preview.7 unchanged; this release updates version metadata and documentation only.

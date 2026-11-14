@@ -19,7 +19,7 @@
  *   the layer, so a preset skill with the same name still wins.
  *
  * The plugin writes no session events and registers no HTTP routes.
- * @module dsh-nai5-prompting
+ * @module @miint-sunny/dsh-nai-desk
  */
 import z from '@deepseek-ai/schemastery'
 
@@ -96,7 +96,7 @@ export function hideGlobalTools(ctx, keep) {
       for (const toolName of names) denied.add(toolName)
     } catch (error) {
       // A tool can unregister between the read and the restriction; the next change or step retries.
-      ctx.logger.warn(`dsh-nai5-prompting: could not hide global tools ${names.join(', ')}: ${error instanceof Error ? error.message : String(error)}`)
+      ctx.logger.warn(`@miint-sunny/dsh-nai-desk: could not hide global tools ${names.join(', ')}: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
   sync()

@@ -4,12 +4,12 @@
 
 NAI Desk is a prompt-authoring plugin for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness), targeting NovelAI Diffusion V5. It provides an NAI5 preset and a session draft editor. Model tools and the editor operate on the same draft; image generation remains on the NovelAI website.
 
-Current version: **0.2.0**.
+Current source version: **0.2.0**. The new scoped package is being prepared and has not been published.
 
 ## Features
 
 - Edit the Base Prompt and draft-level Undesired Content (UC).
-- Follow dsh's theme, fonts and default control patterns in light and dark mode; see [editor styling (Chinese)](docs/ui.md).
+- Follow dsh's theme, fonts and default control patterns in light and dark mode; see [editor styling (Chinese)](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/docs/ui.md).
 - Manage characters: prompt, character UC, name, enabled state, and folding. Move up, move down, and delete sit in the “⋯” menu of each character header; a deletion can be undone.
 - Hide text from the model: mask a selected span, or use the eye button in a card header to mask a whole field or character. A closed eye means the model cannot read it, and a masked field shows the same mark on its tab. The model sees only placeholders such as `⟪屏蔽N⟫`, knows something is there, and cannot read or overwrite it; manual copying yields the original text.
 - Version history: each model write and manual edit becomes a version you can browse from the panel header and restore with “恢复此版本” (Restore this version).
@@ -19,40 +19,41 @@ Current version: **0.2.0**.
 
 The plugin does not perform image generation or website form operations and includes no external connector. Text remains selectable for manual copying.
 
-## Installation and upgrades
+## Standalone installation and migration
 
-Add an installation source in the DeepSeek Harness plugin manager, or use its CLI. Before running the CLI command below, fully quit the desktop app and TUI (⌘Q on macOS).
+The new package name is `@miint-sunny/dsh-nai-desk`. This rename is being prepared and has not been published; use the npm installation below after publication. The existing GitHub `v0.2.0` tag uses the old package name and does not indicate publication of the scoped package.
+
+Add `@miint-sunny/dsh-nai-desk` on the DeepSeek Harness plugin page, or fully quit the desktop app and TUI (⌘Q on macOS) before running:
 
 ```sh
-dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0
+dsh plugin --profile desktop add @miint-sunny/dsh-nai-desk
 ```
 
-Release tags include compiled output, and installation does not run this plugin's build. Development installations can use `link:/absolute/path/to/checkout`; linked installs use working-tree files directly, so quit dsh before rebuilding or switching versions.
+This package works on its own; no separate sidebar package or plugin suite is required. The archive includes prebuilt `lib/`, and installation does not run this plugin's build scripts. Before publication, install the `.tgz` produced by `npm pack` through the plugin page or `dsh plugin --profile desktop add /path/to/package.tgz`. Development installations can also use `link:/absolute/path/to/checkout`; linked installs use working-tree files directly, so quit the corresponding host before rebuilding or switching versions.
+
+To migrate, back up the target profile and remove the old package before adding the new one during the same host shutdown:
+
+```sh
+dsh plugin --profile desktop remove dsh-nai5-prompting
+dsh plugin --profile desktop add @miint-sunny/dsh-nai-desk
+```
 
 ### Stable identifiers
 
 | Identifier | Value | Purpose |
 |---|---|---|
 | Repository and product | `dsh-nai-desk` / NAI Desk | Project location and display name |
-| Package/install identity | `dsh-nai5-prompting` | Existing dependency and profile compatibility |
+| Package/install identity | `@miint-sunny/dsh-nai-desk` | New installations and module resolution |
+| Row IDs | Existing values such as `nai-desk` / `preset-nai5-prompting` | Existing profile overrides |
 | Preset ID | `nai5-prompting` | Existing session associations |
 
-This is one plugin package; no separate sidebar package is required. See the [architecture notes (Chinese)](docs/architecture.md) for the compatibility rationale.
+Row IDs, API paths, service identifiers and stored draft formats stay unchanged; see the [architecture notes (Chinese)](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/docs/architecture.md). Change explicit old module names in custom rows to the scoped name or `@miint-sunny/dsh-nai-desk/tools` while keeping the row IDs and configuration values.
 
-A profile override of the entire `preset-nai5-prompting` row takes precedence over the bundled row. Compare custom overrides with [cordis.patch.yml](cordis.patch.yml) when upgrading; upstream configuration is not automatically merged into them.
-
-If an upgrade from the old repository address fails an integrity check for the old GitHub archive, back up the profile, remove the old dependency, and install from the new address:
-
-```sh
-dsh plugin --profile desktop remove dsh-nai5-prompting
-dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0
-```
-
-Do not replace integrity hashes to suppress an error. To roll back to 0.1.x, use the `v0.1.6` tag under the new repository address; 0.1.x does not provide the draft editor.
+A profile override of the entire `preset-nai5-prompting` row takes precedence over the bundled row. Compare custom overrides with [cordis.patch.yml](cordis.patch.yml) when upgrading, including module names, draft tools and environment instructions; upstream configuration is not automatically merged into them.
 
 ## Usage
 
-1. Select a prompt-authoring workspace. Optional long-term preferences belong in `NAI.md`; see the [example](examples/studio/NAI.md).
+1. Select a prompt-authoring workspace. Optional long-term preferences belong in `NAI.md`; see the [example](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/examples/studio/NAI.md).
 2. Start or continue an **NAI5 提示词** session.
 3. The draft opens on the first model write. You can also use the **提示词稿纸** card under a reply, or choose **提示词稿纸** from the right sidebar's **+** menu.
 4. Describe the request or identify fields to change. Edit the resulting draft and manually copy text into NovelAI.
@@ -68,7 +69,7 @@ The editor saves drafts automatically; file tools write workspace files when req
 - There is no cross-process lock or notification mechanism, or automatic draft inheritance when a session is forked. Draft history keeps up to 60 steps. Multiple host processes must not write the same draft storage concurrently.
 - Preset isolation controls tool and skill visibility; it is not a process or permission sandbox. dsh remains responsible for file access, tool authorization, and network policy.
 
-See the [API reference (Chinese)](docs/api.md) for data structures, length units, error responses, and retry rules.
+See the [API reference (Chinese)](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/docs/api.md) for data structures, length units, error responses, and retry rules.
 
 Draft tools return the model's view of the draft: masked content appears only as placeholders; other text, including disabled characters, is returned as stored. Manual editing and autosave do not initiate model requests.
 
@@ -94,7 +95,7 @@ Project instructions use `NAI.md`. Host-level instructions and permissions still
 | Draft HTTP API | `/api/nai-desk/v1` |
 | Stored draft schema | `schemaVersion: 1` |
 
-An engine range is not a claim that every matching release was tested. Automated tests, isolated-host checks, and model-quality evaluation provide different evidence. See the [verification record](docs/verification-0.2.0.md) and [changelog](CHANGELOG.md).
+An engine range is not a claim that every matching release was tested. Automated tests, isolated-host checks, and model-quality evaluation provide different evidence. See the [verification record](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/docs/verification-0.2.0.md) and [changelog](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/CHANGELOG.md).
 
 ## Development
 
@@ -104,7 +105,7 @@ npm test
 npm pack
 ```
 
-`npm test` builds before testing. `npm pack` packages existing files; ensure `lib/` matches the source before release. Do not edit generated bundles directly.
+`npm test` builds before testing, including real `npm pack` artifact checks. `npm pack` packages existing files; ensure `lib/` matches the source before release. The archive retains public API types; build scripts, implementation sources, examples and internal docs remain in the source repository. Do not edit generated bundles directly.
 
 `skills/` is an upstream snapshot checked against `vendor.json`. Update it with `node scripts/sync-skills.mjs <tag>`, not direct edits.
 

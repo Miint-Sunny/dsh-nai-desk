@@ -1,5 +1,5 @@
 {
-  "name": "dsh-nai5-prompting",
+  "name": "@miint-sunny/dsh-nai-desk",
   "version": "0.2.0",
   "description": "DeepSeek Harness 的 NovelAI V5 提示词预设与会话草稿编辑器",
   "keywords": [
@@ -29,24 +29,21 @@
     "./tools": "./lib/tools.js",
     "./api": {
       "types": "./src/api.d.ts"
-    }
+    },
+    "./cordis.patch.yml": "./cordis.patch.yml"
   },
   "files": [
     "lib",
     "locale",
     "skills",
-    "examples",
     "cordis.patch.yml",
     "vendor.json",
     "VENDOR.md",
     "README.md",
     "README.en.md",
     "NOTICE",
-    "src",
-    "scripts",
-    "LICENSE",
-    "CHANGELOG.md",
-    "docs"
+    "src/api.d.ts",
+    "LICENSE"
   ],
   "scripts": {
     "test": "node --test test/*.test.mjs",
@@ -90,5 +87,8 @@
         "@deepseek-ai/dsh-api-session-controller"
       ]
     }
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
