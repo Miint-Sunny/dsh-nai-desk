@@ -9,7 +9,7 @@ test('package exposes its built host, client and preset-only tools without insta
     assert.equal(typeof path, 'string', `missing ${name} export`)
     assert.ok(existsSync(new URL(`../${path}`, import.meta.url)))
   }
-  for (const name of ['install', 'postinstall', 'prepare', 'prepack']) assert.equal(pkg.scripts[name], undefined)
+  for (const name of ['install', 'postinstall', 'prepare']) assert.equal(pkg.scripts[name], undefined)
   assert.ok(!Object.keys(pkg.dependencies ?? {}).some(name => name.startsWith('@deepseek-ai/dsh')))
 })
 

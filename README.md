@@ -105,7 +105,7 @@ npm test
 npm pack
 ```
 
-`npm test` 先构建，再运行测试（包含真实 `npm pack` 产物检查）；`npm pack` 只打包当前文件。发布前应确保 `lib/` 与源码一致。包内保留对外的 API 类型，构建脚本、实现源码、示例和内部文档留在源码仓库。不要直接编辑构建产物。
+`npm test` 先构建，再运行测试（包含真实 `npm pack` 产物检查）；正常执行 `npm pack` 时，`prepack` 会先运行 `npm run build`，缺失或陈旧的 `lib/` 会按当前源码重新生成。发布前运行完整测试，并使用未跳过脚本的正常打包命令。包内保留对外的 API 类型，构建脚本、实现源码、示例和内部文档留在源码仓库。不要直接编辑构建产物。
 
 `skills/` 是上游版本快照，须与 `vendor.json` 的校验值一致。更新使用 `node scripts/sync-skills.mjs <tag>`，不直接修改技能正文。
 

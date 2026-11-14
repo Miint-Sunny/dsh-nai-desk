@@ -105,7 +105,7 @@ npm test
 npm pack
 ```
 
-`npm test` builds before testing, including real `npm pack` artifact checks. `npm pack` packages existing files; ensure `lib/` matches the source before release. The archive retains public API types; build scripts, implementation sources, examples and internal docs remain in the source repository. Do not edit generated bundles directly.
+`npm test` builds before testing, including real `npm pack` artifact checks. Normal `npm pack` runs `npm run build` through `prepack`, regenerating missing or stale `lib/` from the current source. Run the full tests before release and pack without skipping lifecycle scripts. The archive retains public API types; build scripts, implementation sources, examples and internal docs remain in the source repository. Do not edit generated bundles directly.
 
 `skills/` is an upstream snapshot checked against `vendor.json`. Update it with `node scripts/sync-skills.mjs <tag>`, not direct edits.
 

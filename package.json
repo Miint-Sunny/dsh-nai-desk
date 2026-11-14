@@ -49,7 +49,8 @@
     "test": "node --test test/*.test.mjs",
     "sync-skills": "node scripts/sync-skills.mjs",
     "build": "node scripts/build.mjs",
-    "pretest": "npm run build"
+    "pretest": "npm run build",
+    "prepack": "npm run build"
   },
   "engines": {
     "dsh": ">=0.2.1-rc.5 <0.3.0-0",
