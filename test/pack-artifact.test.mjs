@@ -1,9 +1,7 @@
 import test, { before, after } from 'node:test'
 import assert from 'node:assert/strict'
-import { execFileSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, symlinkSync } from 'node:fs'
-import { tmpdir, userInfo } from 'node:os'
+import { existsSync, mkdirSync, readFileSync, rmSync, symlinkSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { createRequire } from 'node:module'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -11,31 +9,17 @@ import { gunzipSync } from 'node:zlib'
 import vm from 'node:vm'
 import { parse } from 'yaml'
 
+import { packInTemporaryCopy } from './support/pack-fixture.mjs'
+import { assertNoPersonalBytes } from './support/pack-privacy.mjs'
+
 const root = fileURLToPath(new URL('..', import.meta.url))
 const expectedName = '@miint-sunny/dsh-nai-desk'
 let scratch, metadata, artifact, manifest, requireArtifact, tarBytes
 
 before(() => {
-  scratch = mkdtempSync(join(tmpdir(), 'nai-pack-'))
-  const home = join(scratch, 'home'), temp = join(scratch, 'tmp')
-  for (const directory of [home, temp, join(scratch, 'unpacked')]) mkdirSync(directory)
-  const env = {
-    ...process.env,
-    HOME: home, DSH_HOME: join(scratch, 'dsh'), TMPDIR: temp,
-    NODE_OPTIONS: undefined, DEEPSEEK_API_KEY: undefined, DEEPSEC_SCOPE_SIGNING_KEY: undefined,
-    NPM_CONFIG_CACHE: join(scratch, 'npm-cache'),
-    NPM_CONFIG_USERCONFIG: join(scratch, 'empty-user.npmrc'),
-    NPM_CONFIG_GLOBALCONFIG: join(scratch, 'empty-global.npmrc'),
-    NPM_CONFIG_OFFLINE: 'true', NPM_CONFIG_UPDATE_NOTIFIER: 'false',
-  }
-  const output = execFileSync('npm', ['pack', '--json', '--ignore-scripts', '--pack-destination', scratch], {
-    cwd: root, env, encoding: 'utf8', timeout: 30_000,
-  })
-  ;[metadata] = JSON.parse(output)
-  const archive = join(scratch, metadata.filename)
-  tarBytes = gunzipSync(readFileSync(archive))
-  execFileSync('tar', ['-xzf', archive, '-C', join(scratch, 'unpacked')], { env, timeout: 10_000 })
-  artifact = join(scratch, 'unpacked/package')
+  const packed = packInTemporaryCopy(root, 'nai-pack-')
+  ;({ scratch, metadata, artifact } = packed)
+  tarBytes = gunzipSync(readFileSync(packed.archive))
   manifest = JSON.parse(readFileSync(join(artifact, 'package.json'), 'utf8'))
   requireArtifact = createRequire(join(artifact, 'package.json'))
 })
@@ -66,10 +50,8 @@ test('the packed client registers under the scoped loader identity', () => {
 })
 
 test('npm pack metadata and decompressed tar contain no personal home or account name', () => {
-  const account = userInfo().username
   for (const [label, bytes] of [['metadata', Buffer.from(JSON.stringify(metadata))], ['tar', tarBytes]]) {
-    assert.equal(bytes.includes(Buffer.from('/Users/')), false, `${label} contains a personal home path`)
-    assert.equal(bytes.includes(Buffer.from(account)), false, `${label} contains the local account name`)
+    assertNoPersonalBytes(bytes, label)
   }
 })
 

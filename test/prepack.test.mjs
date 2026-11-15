@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, relative, sep } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
@@ -12,7 +12,7 @@ const expectedName = '@miint-sunny/dsh-nai-desk'
 
 for (const initialOutput of ['missing', 'stale']) {
   test(`normal npm pack builds usable host, tools and scoped client when lib is ${initialOutput}`, async () => {
-    const scratch = mkdtempSync(join(tmpdir(), 'nai-prepack-'))
+    const scratch = realpathSync(mkdtempSync(join(tmpdir(), 'nai-prepack-')))
     try {
       const source = join(scratch, 'source'), output = join(scratch, 'output'), unpacked = join(scratch, 'unpacked')
       const excluded = new Set(['.git', 'node_modules', 'lib', '.local', '.superpowers'])
@@ -21,7 +21,7 @@ for (const initialOutput of ['missing', 'stale']) {
         filter: path => !excluded.has(relative(root, path).split(sep)[0]),
       })
       // Existing, independently cloned dependencies are read-only build inputs.
-      symlinkSync(join(root, 'node_modules'), join(source, 'node_modules'), 'dir')
+      symlinkSync(realpathSync(join(root, 'node_modules')), join(source, 'node_modules'), 'dir')
       for (const directory of ['home', 'tmp', 'output', 'unpacked']) mkdirSync(join(scratch, directory))
       if (initialOutput === 'stale') {
         mkdirSync(join(source, 'lib'))
