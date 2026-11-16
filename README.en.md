@@ -4,7 +4,7 @@
 
 NAI Desk is a prompt-authoring plugin for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness), targeting NovelAI Diffusion V5. It provides an NAI5 preset and a session draft editor. Model tools and the editor operate on the same draft; image generation remains on the NovelAI website.
 
-Current source version: **0.2.1**. The new scoped package is being prepared and has not been published.
+Current version: **0.2.2**. The package name is `@miint-sunny/dsh-nai-desk`; 0.2.1 and earlier use the old name `dsh-nai5-prompting`.
 
 ## Requirements
 
@@ -27,26 +27,55 @@ The plugin does not perform image generation or website form operations and incl
 
 ## Installation
 
-The package name is `@miint-sunny/dsh-nai-desk`. This scoped package has not been published to npm. The existing GitHub `v0.2.0` tag uses the old package name.
+The package name is `@miint-sunny/dsh-nai-desk`. Install it from a GitHub release tag or a local `.tgz` file; it is not published to npm.
 
-Before npm publication, get a `.tgz` file from the person sharing the plugin. Open **Plugins → Add plugin** in DSH, enter its absolute path, for example `/path/to/miint-sunny-dsh-nai-desk-0.2.0.tgz`, and install it. A relative path or `~` is not an absolute path.
+### Install from a GitHub release tag
 
-After npm publication, enter `@miint-sunny/dsh-nai-desk` in the same field. You can also use the DSH App's bundled command. Quit the host using the target profile first, then replace the example with the actual archive path:
+Fully quit the desktop app and TUI first (⌘Q on macOS), then run:
 
 ```sh
-dsh plugin --profile desktop add /path/to/miint-sunny-dsh-nai-desk-0.2.0.tgz
+dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.2
+```
+
+Release tags include compiled output, and installation does not run this plugin's build.
+
+### Install from a local .tgz file
+
+Get a `.tgz` file from the person sharing the plugin. Open **Plugins → Add plugin** in DSH, enter its absolute path, for example `/path/to/miint-sunny-dsh-nai-desk-0.2.2.tgz`, and install it. A relative path or `~` is not an absolute path. You can also use the DSH App's bundled command. Quit the host using the target profile first, then replace the example with the actual archive path:
+
+```sh
+dsh plugin --profile desktop add /path/to/miint-sunny-dsh-nai-desk-0.2.2.tgz
 ```
 
 The plugin installs independently and includes its built runtime files. Start the corresponding DSH profile after installation and check component status on the Plugins page.
 
-### Migration from the old package name
+### Upgrading from an older version
 
-To migrate, back up the target profile and remove the old package before adding the new one during the same host shutdown:
+Back up the target profile first, and work within one full shutdown of the host. What to do depends on what is installed.
+
+Versions 0.2.1 and earlier are installed under the old name `dsh-nai5-prompting`. Uninstall the old package before installing the new one, and do not keep both names. With both packages in the profile, the `nai-desk` entry and the 「NAI5 提示词」 preset each appear twice in the composed configuration.
 
 ```sh
 dsh plugin --profile desktop remove dsh-nai5-prompting
-dsh plugin --profile desktop add @miint-sunny/dsh-nai-desk
+dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.2
 ```
+
+If `@miint-sunny/dsh-nai-desk` 0.2.0 (local `.tgz`) is installed, do not uninstall it first: add the 0.2.2 archive and it replaces the old version.
+
+```sh
+dsh plugin --profile desktop add /path/to/miint-sunny-dsh-nai-desk-0.2.2.tgz
+```
+
+If your profile's `cordis.patch.yml` contains a copy of one of the rows below and its `name` still uses the old package name, change it to the new name; keep the row IDs and configuration values. A name that starts with `@` needs quotes in YAML.
+
+| Row ID | Old | New |
+|---|---|---|
+| `nai-desk` | `name: dsh-nai5-prompting` | `name: '@miint-sunny/dsh-nai-desk'` |
+| `isolation` | `name: dsh-nai5-prompting` | `name: '@miint-sunny/dsh-nai-desk'` |
+| `nai-desk-tools` | `name: dsh-nai5-prompting/tools` | `name: '@miint-sunny/dsh-nai-desk/tools'` |
+| `skill-filesystem` | `resolve('dsh-nai5-prompting/package.json')` inside `customSkillDirs` | the same place becomes `resolve('@miint-sunny/dsh-nai-desk/package.json')` |
+
+The `isolation`, `skill-filesystem` and `nai-desk-tools` rows sit inside `preset-nai5-prompting`. The host prefers a profile override of the entire `preset-nai5-prompting` row; compare custom overrides with [cordis.patch.yml](cordis.patch.yml) when upgrading, including module names, draft tools and environment instructions. Upstream configuration is not automatically merged into them.
 
 ### Stable identifiers
 
@@ -54,16 +83,15 @@ dsh plugin --profile desktop add @miint-sunny/dsh-nai-desk
 |---|---|---|
 | Repository and product | `dsh-nai-desk` / NAI Desk | Project location and display name |
 | Package/install identity | `@miint-sunny/dsh-nai-desk` | New installations and module resolution |
+| Old package name | `dsh-nai5-prompting` | 0.2.1 and earlier; used only to uninstall the old package when upgrading |
 | Row IDs | Existing values such as `nai-desk` / `preset-nai5-prompting` | Existing profile overrides |
 | Preset ID | `nai5-prompting` | Existing session associations |
 
-Row IDs, API paths, service identifiers and stored draft formats stay unchanged; see the [architecture notes (Chinese)](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/docs/architecture.md). Change explicit old module names in custom rows to the scoped name or `@miint-sunny/dsh-nai-desk/tools` while keeping the row IDs and configuration values.
-
-A profile override of the entire `preset-nai5-prompting` row takes precedence over the bundled row. Compare custom overrides with [cordis.patch.yml](cordis.patch.yml) when upgrading, including module names, draft tools and environment instructions; upstream configuration is not automatically merged into them.
+Row IDs, API paths, service identifiers and stored draft formats stay unchanged; see the [architecture notes (Chinese)](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/docs/architecture.md).
 
 ## Updating and uninstalling
 
-Installations made by npm package name have an update button on the DSH Plugins page. Local `.tgz` installations do not: get the new archive, uninstall the old package on the Plugins page, and install the new archive by its absolute path.
+To update, get the new GitHub tag or `.tgz` and add it again with the commands under Installation; the same-name old version is replaced. Local `.tgz` installations have no update button on the Plugins page; you can also uninstall the old package on the Plugins page and install the new archive by its absolute path.
 
 Use **Uninstall** on the Plugins page to remove the package. Disabling a component stops that component; it does not uninstall the package. Uninstalling does not manage your saved private drafts. Back up important content first. For command-line removal, quit the corresponding host before running:
 
@@ -111,11 +139,11 @@ Project instructions use `NAI.md`. Host-level instructions and permissions still
 | Item | Current declaration |
 |---|---|
 | Installer engine range | dsh `>=0.2.1-rc.5 <0.3.0-0` |
-| Host actually verified | dsh `0.2.1-rc.5`; 0.2.1 was install-checked on `0.2.2-rc.3` |
+| Host actually verified | dsh `0.2.1-rc.5`; 0.2.1 and 0.2.2 were install-checked on `0.2.2-rc.3` |
 | Draft HTTP API | `/api/nai-desk/v1` |
 | Stored draft schema | `schemaVersion: 1` |
 
-An engine range is not a claim that every matching release was tested. Automated tests, isolated-host checks, and model-quality evaluation provide different evidence. See the [verification record](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/docs/verification-0.2.1.md) and [changelog](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/CHANGELOG.md).
+An engine range is not a claim that every matching release was tested. Automated tests, isolated-host checks, and model-quality evaluation provide different evidence. See the [verification record](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/docs/verification-0.2.2.md) and [changelog](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/CHANGELOG.md).
 
 ## Reporting problems
 

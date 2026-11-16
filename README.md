@@ -4,7 +4,7 @@
 
 NAI Desk 是 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的提示词编写插件，面向 NovelAI Diffusion V5。插件提供「NAI5 提示词」预设和按会话保存的稿纸；模型工具与稿纸编辑的是同一份内容。图像生成仍在 NovelAI 网站完成。
 
-当前源码版本：**0.2.1**。新的 scoped 包正在准备，尚未发布。
+当前版本：**0.2.2**。包名为 `@miint-sunny/dsh-nai-desk`；0.2.1 及更早的版本使用旧包名 `dsh-nai5-prompting`。
 
 ## 系统要求
 
@@ -27,26 +27,55 @@ NAI Desk 是 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)
 
 ## 安装
 
-包名为 `@miint-sunny/dsh-nai-desk`。该作用域包尚未发布到 npm；既有 GitHub `v0.2.0` 标签对应旧包名。
+包名为 `@miint-sunny/dsh-nai-desk`，通过 GitHub 版本标签或本地 `.tgz` 文件安装；没有发布到 npm。
 
-发布前，从提供插件的人取得 `.tgz` 文件。在 DSH「插件」页选择「添加插件」，填入文件的绝对路径，例如 `/path/to/miint-sunny-dsh-nai-desk-0.2.0.tgz`，完成安装。相对路径和 `~` 不能代替绝对路径。
+### 从 GitHub 版本标签安装
 
-npm 发布后，在同一位置填写 `@miint-sunny/dsh-nai-desk`。也可使用 DSH App 自带的命令行；先退出使用目标 profile 的宿主，再执行（将示例路径替换为实际文件）：
+先完全退出桌面端及 TUI；macOS 使用 **⌘Q**。然后执行：
 
 ```sh
-dsh plugin --profile desktop add /path/to/miint-sunny-dsh-nai-desk-0.2.0.tgz
+dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.2
+```
+
+版本标签已包含编译产物，安装过程不执行本插件的构建脚本。
+
+### 从本地 .tgz 安装
+
+从提供插件的人取得 `.tgz` 文件。在 DSH「插件」页选择「添加插件」，填入文件的绝对路径，例如 `/path/to/miint-sunny-dsh-nai-desk-0.2.2.tgz`，完成安装。相对路径和 `~` 不能代替绝对路径。也可使用 DSH App 自带的命令行；先退出使用目标 profile 的宿主，再执行（将示例路径替换为实际文件）：
+
+```sh
+dsh plugin --profile desktop add /path/to/miint-sunny-dsh-nai-desk-0.2.2.tgz
 ```
 
 本插件可独立安装，归档包含已构建的运行文件。安装完成后启动对应的 DSH profile，在插件页核对组件状态。
 
-### 从旧包名迁移
+### 从旧版本升级
 
-从旧包迁移时，先备份目标 profile，在同一次停止宿主的窗口中移除旧包，再添加新包：
+升级前先备份目标 profile，并在同一次完全退出宿主的窗口里操作。已安装的版本不同，做法也不同。
+
+已安装 0.2.1 或更早的版本时，包名是旧名 `dsh-nai5-prompting`。先卸载旧包，再安装新版；不要同时保留两个名称。两个包同时留在 profile 里，会让 `nai-desk` 入口和「NAI5 提示词」预设在组合配置里各出现两次。
 
 ```sh
 dsh plugin --profile desktop remove dsh-nai5-prompting
-dsh plugin --profile desktop add @miint-sunny/dsh-nai-desk
+dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.2
 ```
+
+已安装 `@miint-sunny/dsh-nai-desk` 0.2.0（本地 `.tgz`）时，不需要先卸载：直接添加 0.2.2 的归档，会替换旧版。
+
+```sh
+dsh plugin --profile desktop add /path/to/miint-sunny-dsh-nai-desk-0.2.2.tgz
+```
+
+profile 的 `cordis.patch.yml` 里如果复制过下列行，而且 `name` 写的是旧包名，要改成新包名；行 ID 和配置值不动。包名以 `@` 开头，YAML 里要加引号。
+
+| 行 ID | 旧写法 | 新写法 |
+|---|---|---|
+| `nai-desk` | `name: dsh-nai5-prompting` | `name: '@miint-sunny/dsh-nai-desk'` |
+| `isolation` | `name: dsh-nai5-prompting` | `name: '@miint-sunny/dsh-nai-desk'` |
+| `nai-desk-tools` | `name: dsh-nai5-prompting/tools` | `name: '@miint-sunny/dsh-nai-desk/tools'` |
+| `skill-filesystem` | `customSkillDirs` 里的 `resolve('dsh-nai5-prompting/package.json')` | 同一处改成 `resolve('@miint-sunny/dsh-nai-desk/package.json')` |
+
+`isolation`、`skill-filesystem` 和 `nai-desk-tools` 三行在 `preset-nai5-prompting` 里面。宿主会优先采用 profile 里整行覆盖 `preset-nai5-prompting` 的配置；升级时需对照[默认配置](cordis.patch.yml) 合并模块名、稿纸工具和环境说明，不能假定上游配置会自动合入自定义行。
 
 ### 标识符兼容
 
@@ -54,16 +83,15 @@ dsh plugin --profile desktop add @miint-sunny/dsh-nai-desk
 |---|---|---|
 | 仓库与产品名 | `dsh-nai-desk` / NAI Desk | 项目地址与界面展示 |
 | 包与安装标识 | `@miint-sunny/dsh-nai-desk` | 新安装与模块解析 |
+| 旧包名 | `dsh-nai5-prompting` | 0.2.1 及更早；升级时只用来卸载旧包 |
 | 配置行 ID | `nai-desk` / `preset-nai5-prompting` 等原值 | 延续 profile 覆盖 |
 | 预设 ID | `nai5-prompting` | 延续已有会话的预设关联 |
 
-配置行 ID、接口路径、服务标识与稿纸存储格式保持不变，详见[架构说明](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/docs/architecture.md)。自定义行如显式写有旧模块名，改成新包名或 `@miint-sunny/dsh-nai-desk/tools`，并保留行 ID 和配置值。
-
-如果 profile 覆盖了整个 `preset-nai5-prompting` 配置行，宿主会优先采用该覆盖。升级时需对照[默认配置](cordis.patch.yml) 合并模块名、稿纸工具和环境说明，不能假定上游配置会自动合入自定义行。
+配置行 ID、接口路径、服务标识与稿纸存储格式保持不变，详见[架构说明](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/docs/architecture.md)。
 
 ## 更新与卸载
 
-通过 npm 包名安装后，可在 DSH「插件」页使用更新按钮。本地 `.tgz` 安装没有更新按钮；取得新归档后，先在插件页卸载旧包，再以新文件的绝对路径重新安装。
+更新：取得新版本的 GitHub 标签或 `.tgz` 后，用「安装」一节的命令再添加一次，同名旧版会被替换。本地 `.tgz` 安装在插件页没有更新按钮；也可以先在插件页卸载旧包，再以新文件的绝对路径重新安装。
 
 卸载使用插件页的「卸载」。停用组件只停止该组件，不等同于卸载整个包。卸载插件不会替你整理已保存的私人稿纸；重要内容请先自行备份。命令行卸载前先退出对应宿主：
 
@@ -111,11 +139,11 @@ dsh plugin --profile desktop remove @miint-sunny/dsh-nai-desk
 | 项目 | 当前声明 |
 |---|---|
 | 安装器声明范围 | dsh `>=0.2.1-rc.5 <0.3.0-0` |
-| 实际验证的宿主 | dsh `0.2.1-rc.5`；0.2.1 在 `0.2.2-rc.3` 上做了安装检查 |
+| 实际验证的宿主 | dsh `0.2.1-rc.5`；0.2.1 和 0.2.2 在 `0.2.2-rc.3` 上做了安装检查 |
 | 稿纸 HTTP 接口 | `/api/nai-desk/v1` |
 | 稿纸数据格式 | `schemaVersion: 1` |
 
-安装器声明的版本范围不等于每个版本都经过验证。自动测试、隔离环境检查与实际模型质量评估是不同层次的证据。详见 [验证记录](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/docs/verification-0.2.1.md) 和 [变更记录](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/CHANGELOG.md)。
+安装器声明的版本范围不等于每个版本都经过验证。自动测试、隔离环境检查与实际模型质量评估是不同层次的证据。详见 [验证记录](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/docs/verification-0.2.2.md) 和 [变更记录](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/CHANGELOG.md)。
 
 ## 问题反馈
 
