@@ -13,7 +13,7 @@
   - chore#106：稿纸界面文字改成书面语；
   - chore#140、chore#143：包名改成 `@miint-sunny/dsh-nai-desk`，打包前自动构建，归档只含运行文件，打包时检查家目录路径和账号名；
   - chore#158：两版 README 的 macOS 安装和反馈说明，加问题反馈模板。
-- 另改了版本号、CHANGELOG、README 的安装与升级说明和本记录。
+- 另改了版本号、CHANGELOG、README 的安装与升级说明、AGENTS.md 的开发命令和本记录。
 - `lib/` 在合并前后、版本号改动前后重新构建，三个文件的 SHA-256 都和起点一致。
 
 ## 合并方式
@@ -44,7 +44,7 @@
 
 ## 临时 DSH_HOME 验收
 
-三个归档：0.2.2 用 `npm pack` 从本记录所在的提交打出（81 个文件；本记录不属于归档）；0.2.1 在临时工作树里检出 `v0.2.1` 标签后打出（118 个文件）；`@miint-sunny/dsh-nai-desk` 0.2.0 从 `2bac2af` 打出（81 个文件，与 11 月 15 日打的那份逐字节相同）。
+三个归档：0.2.2 用 `npm pack` 从本分支的最终内容打出（81 个文件；`docs/` 和 `AGENTS.md` 不属于归档，本记录和 `AGENTS.md` 的改动都不影响它）；0.2.1 在临时工作树里检出 `v0.2.1` 标签后打出（118 个文件）；`@miint-sunny/dsh-nai-desk` 0.2.0 从 `2bac2af` 打出（81 个文件，与 11 月 15 日打的那份逐字节相同）。
 
 每个情形都从空的 HOME、TMPDIR 和 DSH_HOME 开始，不复制真实 profile 的任何文件。命令行放在沙箱里运行，沙箱拦住外网和真实 `~/.dsh` 的读写；安装一律带 `--config.offline=true`。桌面端的 `desktop` profile 在空的 DSH_HOME 里建不出来（命令行要求先打开一次桌面端），所以用 `web` profile，和 0.2.0、0.2.1 的验收一致。日常 `~/.dsh` 的桌面端 profile 里 `package.json` 和 `pnpm-lock.yaml` 的 SHA-256 前后相同。
 
