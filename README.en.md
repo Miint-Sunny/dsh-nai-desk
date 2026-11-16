@@ -160,4 +160,4 @@ Remove keys, tokens, private chat and draft contents before submitting. Reproduc
 
 GPL-3.0-only; see [LICENSE](LICENSE) and [NOTICE](NOTICE). Skills originate from [nai5-prompting](https://github.com/Miint-Sunny/nai5-prompting). Bundled third-party code retains its own license notices.
 
-Development, testing, and upstream skill snapshot update instructions are in `AGENTS.md` and `VENDOR.md` in the source repository.
+Development, testing, and upstream skill snapshot update instructions are in `AGENTS.md` (Chinese) and `VENDOR.md` (Chinese) in the source repository.

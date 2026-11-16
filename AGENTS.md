@@ -12,3 +12,15 @@
 - 发布前同时更新 README.md / README.en.md、版本和 CHANGELOG，运行完整检查与临时 DSH_HOME 验收。未发布的 scoped 包改名准备保留当前版本，在 CHANGELOG 的 Unreleased 中记录；真正发布前再确认版本，不把准备工作写成已发布。
 - 不读 .env 或真实凭据，不提交私人数据、测试运行记录或个人绝对路径。
 - 修改日常 ~/.dsh 前须由用户确认 ⌘Q 完全退出；先备份配置。仓库改名、推送和发布以会话中的用户授权为准，不重复索取已给出的授权。
+
+## 开发命令
+
+```sh
+npm ci --ignore-scripts
+npm test
+npm pack
+```
+
+- `npm test` 先构建，再运行测试，包含真实 `npm pack` 产物检查。
+- 正常执行 `npm pack` 时，`prepack` 会先运行 `npm run build`，缺失或陈旧的 `lib/` 会按当前源码重新生成。发布前运行完整测试，并使用未跳过脚本的正常打包命令。
+- `lib/` 是构建产物，不要直接编辑；修改 `src/` 后重新构建。
