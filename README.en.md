@@ -53,14 +53,14 @@ The plugin installs independently and includes its built runtime files. Start th
 
 Back up the target profile first, and work within one full shutdown of the host. What to do depends on what is installed.
 
-Versions 0.2.1 and earlier are installed under the old name `dsh-nai5-prompting`. Uninstall the old package before installing the new one, and do not keep both names. With both packages in the profile, the `nai-desk` entry and the 「NAI5 提示词」 preset each appear twice in the composed configuration.
+GitHub releases up to and including `v0.2.1` are installed under the old name `dsh-nai5-prompting`. Uninstall the old package before installing the new one, and do not keep both names. With both packages in the profile, the `nai-desk` entry and the 「NAI5 提示词」 preset each appear twice in the composed configuration.
 
 ```sh
 dsh plugin --profile desktop remove dsh-nai5-prompting
 dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.2
 ```
 
-If `@miint-sunny/dsh-nai-desk` 0.2.0 (local `.tgz`) is installed, do not uninstall it first: add the 0.2.2 archive and it replaces the old version.
+If `@miint-sunny/dsh-nai-desk` 0.2.0 is installed (a local `.tgz`; it is not the same package as GitHub's `v0.2.0`), do not uninstall it first: add the 0.2.2 archive and it replaces the old version.
 
 ```sh
 dsh plugin --profile desktop add /path/to/miint-sunny-dsh-nai-desk-0.2.2.tgz
@@ -75,7 +75,7 @@ If your profile's `cordis.patch.yml` contains a copy of one of the rows below an
 | `nai-desk-tools` | `name: dsh-nai5-prompting/tools` | `name: '@miint-sunny/dsh-nai-desk/tools'` |
 | `skill-filesystem` | `resolve('dsh-nai5-prompting/package.json')` inside `customSkillDirs` | the same place becomes `resolve('@miint-sunny/dsh-nai-desk/package.json')` |
 
-The `isolation`, `skill-filesystem` and `nai-desk-tools` rows sit inside `preset-nai5-prompting`. The host prefers a profile override of the entire `preset-nai5-prompting` row; compare custom overrides with [cordis.patch.yml](cordis.patch.yml) when upgrading, including module names, draft tools and environment instructions. Upstream configuration is not automatically merged into them.
+The `isolation`, `skill-filesystem` and `nai-desk-tools` rows sit inside `preset-nai5-prompting`. A profile override of the entire `preset-nai5-prompting` row takes precedence over the bundled row. Compare custom overrides with [cordis.patch.yml](cordis.patch.yml) when upgrading, including module names, draft tools and environment instructions; upstream configuration is not automatically merged into them.
 
 ### Stable identifiers
 
@@ -91,7 +91,7 @@ Row IDs, API paths, service identifiers and stored draft formats stay unchanged;
 
 ## Updating and uninstalling
 
-To update, get the new GitHub tag or `.tgz` and add it again with the commands under Installation; the same-name old version is replaced. Local `.tgz` installations have no update button on the Plugins page; you can also uninstall the old package on the Plugins page and install the new archive by its absolute path.
+To update, get the new `.tgz` and add it again with the command under Installation; the same-name old version is replaced. For a GitHub release tag, run the command again with the new tag. Local `.tgz` installations have no update button on the Plugins page; you can also uninstall the old package on the Plugins page and install the new archive by its absolute path.
 
 Use **Uninstall** on the Plugins page to remove the package. Disabling a component stops that component; it does not uninstall the package. Uninstalling does not manage your saved private drafts. Back up important content first. For command-line removal, quit the corresponding host before running:
 

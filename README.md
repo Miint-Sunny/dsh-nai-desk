@@ -53,14 +53,14 @@ dsh plugin --profile desktop add /path/to/miint-sunny-dsh-nai-desk-0.2.2.tgz
 
 升级前先备份目标 profile，并在同一次完全退出宿主的窗口里操作。已安装的版本不同，做法也不同。
 
-已安装 0.2.1 或更早的版本时，包名是旧名 `dsh-nai5-prompting`。先卸载旧包，再安装新版；不要同时保留两个名称。两个包同时留在 profile 里，会让 `nai-desk` 入口和「NAI5 提示词」预设在组合配置里各出现两次。
+已安装 GitHub 发布的 `v0.2.1` 或更早版本时，包名是旧名 `dsh-nai5-prompting`。先卸载旧包，再安装新版；不要同时保留两个名称。两个包同时留在 profile 里，会让 `nai-desk` 入口和「NAI5 提示词」预设在组合配置里各出现两次。
 
 ```sh
 dsh plugin --profile desktop remove dsh-nai5-prompting
 dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.2
 ```
 
-已安装 `@miint-sunny/dsh-nai-desk` 0.2.0（本地 `.tgz`）时，不需要先卸载：直接添加 0.2.2 的归档，会替换旧版。
+已安装 `@miint-sunny/dsh-nai-desk` 0.2.0（本地 `.tgz`，与 GitHub 的 `v0.2.0` 不是同一个包）时，不需要先卸载：直接添加 0.2.2 的归档，会替换旧版。
 
 ```sh
 dsh plugin --profile desktop add /path/to/miint-sunny-dsh-nai-desk-0.2.2.tgz
@@ -75,7 +75,7 @@ profile 的 `cordis.patch.yml` 里如果复制过下列行，而且 `name` 写�
 | `nai-desk-tools` | `name: dsh-nai5-prompting/tools` | `name: '@miint-sunny/dsh-nai-desk/tools'` |
 | `skill-filesystem` | `customSkillDirs` 里的 `resolve('dsh-nai5-prompting/package.json')` | 同一处改成 `resolve('@miint-sunny/dsh-nai-desk/package.json')` |
 
-`isolation`、`skill-filesystem` 和 `nai-desk-tools` 三行在 `preset-nai5-prompting` 里面。宿主会优先采用 profile 里整行覆盖 `preset-nai5-prompting` 的配置；升级时需对照[默认配置](cordis.patch.yml) 合并模块名、稿纸工具和环境说明，不能假定上游配置会自动合入自定义行。
+`isolation`、`skill-filesystem` 和 `nai-desk-tools` 三行在 `preset-nai5-prompting` 里面。如果 profile 覆盖了整个 `preset-nai5-prompting` 配置行，宿主会优先采用该覆盖；升级时需对照[默认配置](cordis.patch.yml) 合并模块名、稿纸工具和环境说明，不能假定上游配置会自动合入自定义行。
 
 ### 标识符兼容
 
@@ -91,7 +91,7 @@ profile 的 `cordis.patch.yml` 里如果复制过下列行，而且 `name` 写�
 
 ## 更新与卸载
 
-更新：取得新版本的 GitHub 标签或 `.tgz` 后，用「安装」一节的命令再添加一次，同名旧版会被替换。本地 `.tgz` 安装在插件页没有更新按钮；也可以先在插件页卸载旧包，再以新文件的绝对路径重新安装。
+更新：取得新版本的 `.tgz` 后，用「安装」一节的命令再添加一次，同名旧版会被替换；GitHub 版本标签则把命令里的标签换成新版本再执行。本地 `.tgz` 安装在插件页没有更新按钮；也可以先在插件页卸载旧包，再以新文件的绝对路径重新安装。
 
 卸载使用插件页的「卸载」。停用组件只停止该组件，不等同于卸载整个包。卸载插件不会替你整理已保存的私人稿纸；重要内容请先自行备份。命令行卸载前先退出对应宿主：
 
