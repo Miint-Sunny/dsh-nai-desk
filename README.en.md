@@ -4,7 +4,7 @@
 
 NAI Desk is a prompt-authoring plugin for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness), targeting NovelAI Diffusion V5. It provides an NAI5 preset and a session draft editor. Model tools and the editor operate on the same draft; image generation remains on the NovelAI website.
 
-Current version: **0.2.0**.
+Current version: **0.2.1**.
 
 ## Features
 
@@ -15,7 +15,7 @@ Current version: **0.2.0**.
 - Version history: each model write and manual edit becomes a version you can browse from the panel header and restore with “恢复此版本” (Restore this version).
 - Submit manual edits automatically and receive committed updates when connected. Models update drafts through the `desk_*` tools. The first model write in a session pushes the right sidebar open on the draft; each later turn that wrote the draft ends with a card that reopens it.
 - Persist drafts by session and load them after restart. Existing chat history is not automatically converted into a draft.
-- Use the bundled nai5-prompting skills. The current snapshot is v1.2.8 with 11 skills; provenance and checksums are recorded in [VENDOR.md](VENDOR.md) and [vendor.json](vendor.json).
+- Use the bundled nai5-prompting skills. The current snapshot is v1.2.9 with 11 skills; provenance and checksums are recorded in [VENDOR.md](VENDOR.md) and [vendor.json](vendor.json).
 
 The plugin does not perform image generation or website form operations and includes no external connector. Text remains selectable for manual copying.
 
@@ -24,7 +24,7 @@ The plugin does not perform image generation or website form operations and incl
 Add an installation source in the DeepSeek Harness plugin manager, or use its CLI. Before running the CLI command below, fully quit the desktop app and TUI (⌘Q on macOS).
 
 ```sh
-dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0
+dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.1
 ```
 
 Release tags include compiled output, and installation does not run this plugin's build. Development installations can use `link:/absolute/path/to/checkout`; linked installs use working-tree files directly, so quit dsh before rebuilding or switching versions.
@@ -45,7 +45,7 @@ If an upgrade from the old repository address fails an integrity check for the o
 
 ```sh
 dsh plugin --profile desktop remove dsh-nai5-prompting
-dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.0
+dsh plugin --profile desktop add github:Miint-Sunny/dsh-nai-desk#v0.2.1
 ```
 
 Do not replace integrity hashes to suppress an error. To roll back to 0.1.x, use the `v0.1.6` tag under the new repository address; 0.1.x does not provide the draft editor.
@@ -90,11 +90,11 @@ Project instructions use `NAI.md`. Host-level instructions and permissions still
 | Item | Current declaration |
 |---|---|
 | Installer engine range | dsh `>=0.2.1-rc.5 <0.3.0-0` |
-| Host actually verified | dsh `0.2.1-rc.5` |
+| Host actually verified | dsh `0.2.1-rc.5`; 0.2.1 was install-checked on `0.2.2-rc.3` |
 | Draft HTTP API | `/api/nai-desk/v1` |
 | Stored draft schema | `schemaVersion: 1` |
 
-An engine range is not a claim that every matching release was tested. Automated tests, isolated-host checks, and model-quality evaluation provide different evidence. See the [verification record](docs/verification-0.2.0.md) and [changelog](CHANGELOG.md).
+An engine range is not a claim that every matching release was tested. Automated tests, isolated-host checks, and model-quality evaluation provide different evidence. See the [verification record](docs/verification-0.2.1.md) and [changelog](CHANGELOG.md).
 
 ## Development
 
