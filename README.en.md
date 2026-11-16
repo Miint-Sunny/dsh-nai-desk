@@ -75,7 +75,7 @@ dsh plugin --profile desktop remove @miint-sunny/dsh-nai-desk
 
 1. Select a prompt-authoring workspace. Optional long-term preferences belong in `NAI.md`; see the [example](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/examples/studio/NAI.md).
 2. Start or continue an **NAI5 提示词** session.
-3. The draft opens on the first model write. You can also use the **提示词稿纸** card under a reply, or choose **提示词稿纸** from the right sidebar's **+** menu.
+3. The draft opens on the first model write. You can also use the **稿纸** card under a reply, or choose **提示词稿纸** from the right sidebar's **+** menu.
 4. Describe the request or identify fields to change. Edit the resulting draft and manually copy text into NovelAI.
 
 Request planning only when that is the intended output. Ask for the complete text in chat when needed. Image-input availability depends on the selected model.
@@ -131,3 +131,5 @@ Remove keys, tokens, private chat and draft contents before submitting. Reproduc
 ## License
 
 GPL-3.0-only; see [LICENSE](LICENSE) and [NOTICE](NOTICE). Skills originate from [nai5-prompting](https://github.com/Miint-Sunny/nai5-prompting). Bundled third-party code retains its own license notices.
+
+Development, testing, and upstream skill snapshot update instructions are in `AGENTS.md` and `VENDOR.md` in the source repository.

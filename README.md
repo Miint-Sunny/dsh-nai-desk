@@ -131,3 +131,5 @@ dsh plugin --profile desktop remove @miint-sunny/dsh-nai-desk
 ## 许可
 
 GPL-3.0-only，见 [LICENSE](LICENSE) 与 [NOTICE](NOTICE)。内置技能来自 [nai5-prompting](https://github.com/Miint-Sunny/nai5-prompting)。随包分发的第三方代码保留各自许可声明。
+
+开发、测试和更新上游技能快照的说明在源码仓库的 `AGENTS.md` 和 `VENDOR.md`。
