@@ -4,7 +4,7 @@
 
 NAI Desk is a prompt-authoring plugin for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness), targeting NovelAI Diffusion V5. It provides an NAI5 preset and a session draft editor. Model tools and the editor operate on the same draft; image generation remains on the NovelAI website.
 
-Current source version: **0.2.0**. The new scoped package is being prepared and has not been published.
+Current source version: **0.2.1**. The new scoped package is being prepared and has not been published.
 
 ## Requirements
 
@@ -21,7 +21,7 @@ Current source version: **0.2.0**. The new scoped package is being prepared and 
 - Version history: each model write and manual edit becomes a version you can browse from the panel header and restore with “恢复此版本” (Restore this version).
 - Submit manual edits automatically and receive committed updates when connected. Models update drafts through the `desk_*` tools. The first model write in a session pushes the right sidebar open on the draft; each later turn that wrote the draft ends with a card that reopens it.
 - Persist drafts by session and load them after restart. Existing chat history is not automatically converted into a draft.
-- Use the bundled nai5-prompting skills. The current snapshot is v1.2.8 with 11 skills; provenance and checksums are recorded in [VENDOR.md](VENDOR.md) and [vendor.json](vendor.json).
+- Use the bundled nai5-prompting skills. The current snapshot is v1.2.9 with 11 skills; provenance and checksums are recorded in [VENDOR.md](VENDOR.md) and [vendor.json](vendor.json).
 
 The plugin does not perform image generation or website form operations and includes no external connector. Text remains selectable for manual copying.
 
@@ -111,11 +111,11 @@ Project instructions use `NAI.md`. Host-level instructions and permissions still
 | Item | Current declaration |
 |---|---|
 | Installer engine range | dsh `>=0.2.1-rc.5 <0.3.0-0` |
-| Host actually verified | dsh `0.2.1-rc.5` |
+| Host actually verified | dsh `0.2.1-rc.5`; 0.2.1 was install-checked on `0.2.2-rc.3` |
 | Draft HTTP API | `/api/nai-desk/v1` |
 | Stored draft schema | `schemaVersion: 1` |
 
-An engine range is not a claim that every matching release was tested. Automated tests, isolated-host checks, and model-quality evaluation provide different evidence. See the [verification record](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/docs/verification-0.2.0.md) and [changelog](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/CHANGELOG.md).
+An engine range is not a claim that every matching release was tested. Automated tests, isolated-host checks, and model-quality evaluation provide different evidence. See the [verification record](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/docs/verification-0.2.1.md) and [changelog](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/CHANGELOG.md).
 
 ## Reporting problems
 

@@ -8,6 +8,11 @@
 - Export `./cordis.patch.yml` and limit the archive to prebuilt runtime files, public API types, locales, skills and license/provenance material. Exclude build scripts, implementation sources, examples and internal docs.
 - Document standalone plugin-page/CLI installation and removal of `dsh-nai5-prompting` before adding the scoped package. Preserve all row IDs, the `nai5-prompting` preset ID, authenticated API path, service/storage identifiers, GPL-3.0-only licensing and every vendored byte.
 
+## 0.2.1 · 2026-11-16
+
+- Update the vendored skills to nai5-prompting v1.2.9 with `scripts/sync-skills.mjs`. Reverse prompts no longer leave an artist-string placeholder, and a copyright character the user names gets only its gender word and name; an empty `<artist>` block is left only when the environment asks for an artist-string slot; when the user names no specific outfit, a model that is sure of one of the character's other existing outfits may use it, with the old rules as the fallback.
+- Only `skills/`, `vendor.json` and documentation change. The plugin code, the preset and the sheet are the same as 0.2.0. Install identity `dsh-nai5-prompting` and preset ID `nai5-prompting` are unchanged.
+
 ## 0.2.0 · 2026-11-03
 
 - First stable NAI Desk release. The plugin code is 0.2.0-preview.7 unchanged; this release updates version metadata and documentation only.

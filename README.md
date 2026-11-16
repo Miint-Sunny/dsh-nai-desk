@@ -4,7 +4,7 @@
 
 NAI Desk 是 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的提示词编写插件，面向 NovelAI Diffusion V5。插件提供「NAI5 提示词」预设和按会话保存的稿纸；模型工具与稿纸编辑的是同一份内容。图像生成仍在 NovelAI 网站完成。
 
-当前源码版本：**0.2.0**。新的 scoped 包正在准备，尚未发布。
+当前源码版本：**0.2.1**。新的 scoped 包正在准备，尚未发布。
 
 ## 系统要求
 
@@ -21,7 +21,7 @@ NAI Desk 是 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)
 - 版本历史：模型每次写入和手动修改都记成一个版本，可在稿纸顶部前后翻看，用「恢复此版本」把旧版本恢复为当前内容。
 - 模型通过 `desk_*` 工具更新稿纸；编辑器自动提交手动修改，并在连接可用时接收已提交的更新。模型在一个会话里第一次写稿时，右侧栏自动推开到稿纸；之后每轮写过稿的回复末尾有一张卡片，点「打开」即可再次打开。
 - 稿纸按会话保存，重启后从宿主存储恢复。旧会话不会自动从历史回复提取内容。
-- 使用内置的 nai5-prompting 技能指导提示词编写。当前快照为 v1.2.8，包含 11 个技能；来源和校验值见 [VENDOR.md](VENDOR.md) 与 [vendor.json](vendor.json)。
+- 使用内置的 nai5-prompting 技能指导提示词编写。当前快照为 v1.2.9，包含 11 个技能；来源和校验值见 [VENDOR.md](VENDOR.md) 与 [vendor.json](vendor.json)。
 
 本插件不执行图像生成或网站表单操作，也不包含外部连接器。界面保留原生文本选择，供手动复制。
 
@@ -111,11 +111,11 @@ dsh plugin --profile desktop remove @miint-sunny/dsh-nai-desk
 | 项目 | 当前声明 |
 |---|---|
 | 安装器声明范围 | dsh `>=0.2.1-rc.5 <0.3.0-0` |
-| 实际验证的宿主 | dsh `0.2.1-rc.5` |
+| 实际验证的宿主 | dsh `0.2.1-rc.5`；0.2.1 在 `0.2.2-rc.3` 上做了安装检查 |
 | 稿纸 HTTP 接口 | `/api/nai-desk/v1` |
 | 稿纸数据格式 | `schemaVersion: 1` |
 
-安装器声明的版本范围不等于每个版本都经过验证。自动测试、隔离环境检查与实际模型质量评估是不同层次的证据。详见 [验证记录](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/docs/verification-0.2.0.md) 和 [变更记录](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/CHANGELOG.md)。
+安装器声明的版本范围不等于每个版本都经过验证。自动测试、隔离环境检查与实际模型质量评估是不同层次的证据。详见 [验证记录](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/docs/verification-0.2.1.md) 和 [变更记录](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/CHANGELOG.md)。
 
 ## 问题反馈
 
