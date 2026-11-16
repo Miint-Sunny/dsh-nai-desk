@@ -6,6 +6,12 @@ NAI Desk is a prompt-authoring plugin for [DeepSeek Harness](https://github.com/
 
 Current source version: **0.2.0**. The new scoped package is being prepared and has not been published.
 
+## Requirements
+
+- DSH App: `>=0.2.1-rc.5 <0.3.0-0`, matching `engines.dsh` in `package.json`.
+- macOS only. Windows is not supported yet.
+- Model-assisted writing requires a model configured in DSH. Manual draft editing does not send model requests.
+
 ## Features
 
 - Edit the Base Prompt and draft-level Undesired Content (UC).
@@ -19,17 +25,21 @@ Current source version: **0.2.0**. The new scoped package is being prepared and 
 
 The plugin does not perform image generation or website form operations and includes no external connector. Text remains selectable for manual copying.
 
-## Standalone installation and migration
+## Installation
 
-The new package name is `@miint-sunny/dsh-nai-desk`. This rename is being prepared and has not been published; use the npm installation below after publication. The existing GitHub `v0.2.0` tag uses the old package name and does not indicate publication of the scoped package.
+The package name is `@miint-sunny/dsh-nai-desk`. This scoped package has not been published to npm. The existing GitHub `v0.2.0` tag uses the old package name.
 
-Add `@miint-sunny/dsh-nai-desk` on the DeepSeek Harness plugin page, or fully quit the desktop app and TUI (⌘Q on macOS) before running:
+Before npm publication, get a `.tgz` file from the person sharing the plugin. Open **Plugins → Add plugin** in DSH, enter its absolute path, for example `/path/to/miint-sunny-dsh-nai-desk-0.2.0.tgz`, and install it. A relative path or `~` is not an absolute path.
+
+After npm publication, enter `@miint-sunny/dsh-nai-desk` in the same field. You can also use the DSH App's bundled command. Quit the host using the target profile first, then replace the example with the actual archive path:
 
 ```sh
-dsh plugin --profile desktop add @miint-sunny/dsh-nai-desk
+dsh plugin --profile desktop add /path/to/miint-sunny-dsh-nai-desk-0.2.0.tgz
 ```
 
-This package works on its own; no separate sidebar package or plugin suite is required. The archive includes prebuilt `lib/`, and installation does not run this plugin's build scripts. Before publication, install the `.tgz` produced by `npm pack` through the plugin page or `dsh plugin --profile desktop add /path/to/package.tgz`. Development installations can also use `link:/absolute/path/to/checkout`; linked installs use working-tree files directly, so quit the corresponding host before rebuilding or switching versions.
+The plugin installs independently and includes its built runtime files. Start the corresponding DSH profile after installation and check component status on the Plugins page.
+
+### Migration from the old package name
 
 To migrate, back up the target profile and remove the old package before adding the new one during the same host shutdown:
 
@@ -51,6 +61,16 @@ Row IDs, API paths, service identifiers and stored draft formats stay unchanged;
 
 A profile override of the entire `preset-nai5-prompting` row takes precedence over the bundled row. Compare custom overrides with [cordis.patch.yml](cordis.patch.yml) when upgrading, including module names, draft tools and environment instructions; upstream configuration is not automatically merged into them.
 
+## Updating and uninstalling
+
+Installations made by npm package name have an update button on the DSH Plugins page. Local `.tgz` installations do not: get the new archive, uninstall the old package on the Plugins page, and install the new archive by its absolute path.
+
+Use **Uninstall** on the Plugins page to remove the package. Disabling a component stops that component; it does not uninstall the package. Uninstalling does not manage your saved private drafts. Back up important content first. For command-line removal, quit the corresponding host before running:
+
+```sh
+dsh plugin --profile desktop remove @miint-sunny/dsh-nai-desk
+```
+
 ## Usage
 
 1. Select a prompt-authoring workspace. Optional long-term preferences belong in `NAI.md`; see the [example](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/examples/studio/NAI.md).
@@ -62,7 +82,7 @@ Request planning only when that is the intended output. Ask for the complete tex
 
 The editor saves drafts automatically; file tools write workspace files when requested. A character's enabled state is saved with the draft. Changing it does not rewrite the Base Prompt.
 
-## Synchronization and data boundaries
+## Known limitations
 
 - Within one host instance, writes are serialized per session and checked against `revision`. The client replays an update only when its target field has not changed remotely. Same-field conflicts require a version choice.
 - A write is acknowledged after host storage reports success. Uncommitted edits exist in client memory and are not guaranteed to survive refresh or forced termination.
@@ -97,17 +117,16 @@ Project instructions use `NAI.md`. Host-level instructions and permissions still
 
 An engine range is not a claim that every matching release was tested. Automated tests, isolated-host checks, and model-quality evaluation provide different evidence. See the [verification record](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/docs/verification-0.2.0.md) and [changelog](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/CHANGELOG.md).
 
-## Development
+## Reporting problems
 
-```sh
-npm ci --ignore-scripts
-npm test
-npm pack
-```
+For a private trial, contact the person who shared the plugin. For public feedback, use [GitHub Issues](https://github.com/Miint-Sunny/dsh-nai-desk/issues). Include:
 
-`npm test` builds before testing, including real `npm pack` artifact checks. Normal `npm pack` runs `npm run build` through `prepack`, regenerating missing or stale `lib/` from the current source. Run the full tests before release and pack without skipping lifecycle scripts. The archive retains public API types; build scripts, implementation sources, examples and internal docs remain in the source repository. Do not edit generated bundles directly.
+- DSH App version, plugin name and version.
+- macOS version and chip type (Apple silicon or Intel).
+- Steps taken, actual result and expected result.
+- Component rows that are not running on the Plugins page and the full error text; screenshots are welcome.
 
-`skills/` is an upstream snapshot checked against `vendor.json`. Update it with `node scripts/sync-skills.mjs <tag>`, not direct edits.
+Remove keys, tokens, private chat and draft contents before submitting. Reproduce the problem with a small invented example. For output problems limited to one model, include its name, never its API key.
 
 ## License
 

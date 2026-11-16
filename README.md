@@ -6,6 +6,12 @@ NAI Desk 是 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)
 
 当前源码版本：**0.2.0**。新的 scoped 包正在准备，尚未发布。
 
+## 系统要求
+
+- DSH App：`>=0.2.1-rc.5 <0.3.0-0`，与 `package.json` 的 `engines.dsh` 一致。
+- 目前仅支持 macOS；Windows 还不支持。
+- 使用模型编写提示词需要在 DSH 中配置可用模型。手动编辑稿纸不发起模型请求。
+
 ## 功能
 
 - 编辑主提示词（NovelAI 的 Base Prompt）和负面提示词（UC）。
@@ -19,17 +25,21 @@ NAI Desk 是 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)
 
 本插件不执行图像生成或网站表单操作，也不包含外部连接器。界面保留原生文本选择，供手动复制。
 
-## 单独安装与迁移
+## 安装
 
-新包名为 `@miint-sunny/dsh-nai-desk`。本次是未发布的改名准备；以下 npm 安装方式在新包发布后使用。既有 GitHub `v0.2.0` 标签对应旧包名，不表示新的 scoped 包已发布。
+包名为 `@miint-sunny/dsh-nai-desk`。该作用域包尚未发布到 npm；既有 GitHub `v0.2.0` 标签对应旧包名。
 
-在 DeepSeek Harness 的插件页添加 `@miint-sunny/dsh-nai-desk`，或在完全退出桌面端和 TUI（macOS 使用 **⌘Q**）后运行：
+发布前，从提供插件的人取得 `.tgz` 文件。在 DSH「插件」页选择「添加插件」，填入文件的绝对路径，例如 `/path/to/miint-sunny-dsh-nai-desk-0.2.0.tgz`，完成安装。相对路径和 `~` 不能代替绝对路径。
+
+npm 发布后，在同一位置填写 `@miint-sunny/dsh-nai-desk`。也可使用 DSH App 自带的命令行；先退出使用目标 profile 的宿主，再执行（将示例路径替换为实际文件）：
 
 ```sh
-dsh plugin --profile desktop add @miint-sunny/dsh-nai-desk
+dsh plugin --profile desktop add /path/to/miint-sunny-dsh-nai-desk-0.2.0.tgz
 ```
 
-本插件单独安装即可，不需要独立的面板包或整套插件。发布包包含预构建 `lib/`，安装过程不执行本插件的构建脚本。发布前可将 `npm pack` 生成的 `.tgz` 文件路径交给插件页或 `dsh plugin --profile desktop add /path/to/package.tgz` 试装。开发环境也可使用 `link:/absolute/path/to/checkout`；链接安装直接使用工作区文件，构建或切换版本前应退出对应宿主。
+本插件可独立安装，归档包含已构建的运行文件。安装完成后启动对应的 DSH profile，在插件页核对组件状态。
+
+### 从旧包名迁移
 
 从旧包迁移时，先备份目标 profile，在同一次停止宿主的窗口中移除旧包，再添加新包：
 
@@ -51,6 +61,16 @@ dsh plugin --profile desktop add @miint-sunny/dsh-nai-desk
 
 如果 profile 覆盖了整个 `preset-nai5-prompting` 配置行，宿主会优先采用该覆盖。升级时需对照[默认配置](cordis.patch.yml) 合并模块名、稿纸工具和环境说明，不能假定上游配置会自动合入自定义行。
 
+## 更新与卸载
+
+通过 npm 包名安装后，可在 DSH「插件」页使用更新按钮。本地 `.tgz` 安装没有更新按钮；取得新归档后，先在插件页卸载旧包，再以新文件的绝对路径重新安装。
+
+卸载使用插件页的「卸载」。停用组件只停止该组件，不等同于卸载整个包。卸载插件不会替你整理已保存的私人稿纸；重要内容请先自行备份。命令行卸载前先退出对应宿主：
+
+```sh
+dsh plugin --profile desktop remove @miint-sunny/dsh-nai-desk
+```
+
 ## 使用
 
 1. 选择用于提示词编写的工作区。长期偏好可写在 `NAI.md` 中，格式见 [配置示例](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/examples/studio/NAI.md)。
@@ -62,7 +82,7 @@ dsh plugin --profile desktop add @miint-sunny/dsh-nai-desk
 
 稿纸自动保存；工作区文件由文件工具按请求写入。角色的启用状态随稿纸保存，切换状态不会改写主提示词。
 
-## 同步与数据边界
+## 已知限制
 
 - 同一宿主实例内，写入按会话串行执行，并检查 `revision`。客户端仅在目标字段未被另一端改动时重放更新；同字段冲突需要选择保留的版本。
 - 写入成功以宿主存储返回成功为准。未提交的编辑保留在当前客户端内存中，不提供跨刷新或强制退出的恢复保证。
@@ -97,17 +117,16 @@ dsh plugin --profile desktop add @miint-sunny/dsh-nai-desk
 
 安装器声明的版本范围不等于每个版本都经过验证。自动测试、隔离环境检查与实际模型质量评估是不同层次的证据。详见 [验证记录](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/docs/verification-0.2.0.md) 和 [变更记录](https://github.com/Miint-Sunny/dsh-nai-desk/blob/main/CHANGELOG.md)。
 
-## 开发
+## 问题反馈
 
-```sh
-npm ci --ignore-scripts
-npm test
-npm pack
-```
+熟人试用时，请直接联系提供插件的人。公开反馈使用 [GitHub Issues](https://github.com/Miint-Sunny/dsh-nai-desk/issues)。请附上：
 
-`npm test` 先构建，再运行测试（包含真实 `npm pack` 产物检查）；正常执行 `npm pack` 时，`prepack` 会先运行 `npm run build`，缺失或陈旧的 `lib/` 会按当前源码重新生成。发布前运行完整测试，并使用未跳过脚本的正常打包命令。包内保留对外的 API 类型，构建脚本、实现源码、示例和内部文档留在源码仓库。不要直接编辑构建产物。
+- DSH App 版本、插件名和版本。
+- macOS 版本和芯片类型（Apple silicon 或 Intel）。
+- 操作步骤、实际结果与期望结果。
+- 插件页里未运行的组件行和完整报错；可附截图。
 
-`skills/` 是上游版本快照，须与 `vendor.json` 的校验值一致。更新使用 `node scripts/sync-skills.mjs <tag>`，不直接修改技能正文。
+提交前遮盖密钥、令牌、私人聊天和稿纸内容；用自编的最小示例复现。仅出现于某个模型的输出问题，请注明模型名，不要附 API 密钥。
 
 ## 许可
 
