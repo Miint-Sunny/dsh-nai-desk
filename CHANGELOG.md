@@ -1,12 +1,15 @@
 # Changelog
 
-## Unreleased
+## 0.2.2 · Unreleased
 
-- Rebuild runtime bundles automatically through `prepack` before normal `npm pack`, including source trees with missing or stale `lib/`; installing the resulting archive still runs no build hook.
-
-- Prepare the standalone npm identity `@miint-sunny/dsh-nai-desk`, including scoped host/tool module locators, the bundled skill path, and the client module loader ID. The scoped package has not been published; keep version 0.2.0 while preparing this new package identity.
-- Export `./cordis.patch.yml` and limit the archive to prebuilt runtime files, public API types, locales, skills and license/provenance material. Exclude build scripts, implementation sources, examples and internal docs.
-- Document standalone plugin-page/CLI installation and removal of `dsh-nai5-prompting` before adding the scoped package. Preserve all row IDs, the `nai5-prompting` preset ID, authenticated API path, service/storage identifiers, GPL-3.0-only licensing and every vendored byte.
+- Rename the install identity to `@miint-sunny/dsh-nai-desk`; 0.2.1 and every earlier release were published under the old name `dsh-nai5-prompting`. The scoped package is not on npm: install it from a GitHub release tag or a local `.tgz`. Row IDs, the preset ID `nai5-prompting`, the HTTP route, the service and storage identifiers and the stored draft format do not change. To upgrade from an older install, remove `dsh-nai5-prompting` first and then add the new package, so that one copy remains; the README lists the cases, including custom profile rows that still name the old package.
+- Carry over 0.2.1: the vendored skills are nai5-prompting v1.2.9, byte for byte as in the 0.2.1 release.
+- A model write to one field may keep only the masking placeholders (`⟪屏蔽N⟫`) that field already holds. Moving a placeholder into another field, or reviving one after the user removed the masked span, is rejected with the `masked` error.
+- Shorten the descriptions of the six `desk_*` tools by about 570 characters per request. The revision and placeholder rules stay in the preset prompt and in `desk_read`.
+- Remove the unused `./host` and `./isolation` exports and their `lib/host.js` and `lib/isolation.js` bundles. `lib/index.js` already contained both and no shipped row or document named them; code that imports either must use the package root.
+- Reword the sheet's conflict and delete-character prompts in written Chinese: 「你的修改」 becomes 「本地修改」.
+- Rebuild the runtime bundles through `prepack` before every `npm pack`, including source trees with a missing or stale `lib/`; installing the archive still runs no build hook. Export `./cordis.patch.yml` and limit the archive to prebuilt runtime files, `src/api.d.ts`, locales, skills and license/provenance material; build scripts, implementation sources, examples and internal docs stay in the repository. A test scans the packed bytes for home paths and the account name.
+- Add system requirements and a problem-reporting guide to both READMEs, and a bug-report issue template.
 
 ## 0.2.1 · 2026-11-16
 
