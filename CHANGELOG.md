@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.2 · Unreleased
+## 0.2.2 · 2026-11-19
 
 - Rename the install identity to `@miint-sunny/dsh-nai-desk`; 0.2.1 and every earlier release were published under the old name `dsh-nai5-prompting`. The scoped package is not on npm: install it from a GitHub release tag or a local `.tgz`. Row IDs, the preset ID `nai5-prompting`, the HTTP route, the service and storage identifiers and the stored draft format do not change. To upgrade from an older install, remove `dsh-nai5-prompting` first and then add the new package, so that one copy remains; the README lists the cases, including custom profile rows that still name the old package.
 - Carry over 0.2.1: the vendored skills are nai5-prompting v1.2.9, byte for byte as in the 0.2.1 release.
