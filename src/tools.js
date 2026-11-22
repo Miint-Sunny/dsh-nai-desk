@@ -124,8 +124,8 @@ export function createDeskTools(store) {
   )
   return [
     define('desk_read', `返回当前会话提示词草稿的已提交快照，包括 main、uc、characters 和 revision。快照包含编辑器已成功保存的修改。${maskRule}masked 标出用户整栏屏蔽的字段和角色，它们只是占位。`, {}, [], async (_args, exec) => modelView(await store.read(callingSession(exec)))),
-    write('desk_set_main', '替换当前会话草稿的主提示词全文，保留负面提示词与角色条目。text 不做格式化或去重。', { text: string }, ['text'], args => ({ type: 'set_main', text: args.text })),
-    write('desk_set_uc', '替换当前会话草稿的草稿级负面提示词全文，保留其它字段。', { text: string }, ['text'], args => ({ type: 'set_uc', text: args.text })),
+    write('desk_set_main', '替换当前稿纸的主提示词全文，保留负面提示词与角色条目。text 不做格式化或去重。', { text: string }, ['text'], args => ({ type: 'set_main', text: args.text })),
+    write('desk_set_uc', '替换当前稿纸的草稿级负面提示词全文，保留其它字段。', { text: string }, ['text'], args => ({ type: 'set_uc', text: args.text })),
     write('desk_set_character', '更新当前快照中第 n 个角色提示词条目；n 等于条目数加 1 时追加新条目。prompt 必填；更新时省略的 uc、name、enabled、position 保留原值。position 为 null 时清除自定义位置。', {
       n: number, prompt: string, uc: string, name: string, enabled: { type: 'boolean' }, position: { oneOf: [positionSchema, { type: 'null' }] },
     }, ['n', 'prompt'], (args, state) => {
